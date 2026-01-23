@@ -26,8 +26,8 @@ export const auth = betterAuth({
   plugins: [
     polar({
       client: polarClient,
-      createCustomerOnSignUp: true,
-      enableCustomerPortal: true,
+      createCustomerOnSignUp: false,
+      enableCustomerPortal: false,
       use: [
         checkout({
           products: [
@@ -39,7 +39,7 @@ export const auth = betterAuth({
           successUrl: process.env.POLAR_SUCCESS_URL,
           authenticatedUsersOnly: true,
         }),
-        portal(),
+    //    portal(),
       ],
     }),
   ],
