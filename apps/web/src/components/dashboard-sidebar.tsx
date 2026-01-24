@@ -1,5 +1,4 @@
 "use client";
-
 import {
 	BarChart3,
 	CreditCard,
@@ -10,6 +9,7 @@ import {
 	Settings,
 	User,
 } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -92,7 +92,7 @@ export function DashboardSidebar({
 								return (
 									<li key={item.href}>
 										<Link
-											href={item.href}
+											href={item.href as Route}
 											className={cn(
 												"flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all duration-200",
 												isActive

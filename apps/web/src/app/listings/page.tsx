@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { ListingCard } from "@/components/listing-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,35 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { orpc } from "@/utils/orpc";
 
+function ListingsPageLoading() {
+	return (
+		<div className="min-h-screen bg-background">
+			<div className="relative flex h-[40vh] min-h-[400px] w-full items-center justify-center overflow-hidden">
+				<div className="absolute inset-0 z-0 animate-pulse bg-muted" />
+			</div>
+			<div className="container mx-auto max-w-[1600px] px-4 py-12">
+				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+					{[1, 2, 3, 4, 5, 6].map((i) => (
+						<div
+							key={i}
+							className="h-64 animate-pulse rounded-lg bg-muted"
+						/>
+					))}
+				</div>
+			</div>
+		</div>
+	);
+}
+
 export default function ListingsPage() {
+	return (
+		<Suspense fallback={<ListingsPageLoading />}>
+			<ListingsContent />
+		</Suspense>
+	);
+}
+
+function ListingsContent() {
 	const searchParams = useSearchParams();
 	const initialSearch = searchParams.get("search") ?? "";
 	const [search, setSearch] = useState(initialSearch);
