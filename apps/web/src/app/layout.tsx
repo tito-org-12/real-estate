@@ -1,41 +1,45 @@
 import type { Metadata } from "next";
 
-import { Geist, Geist_Mono } from "next/font/google";
+import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 
 import "../index.css";
 import Header from "@/components/header";
 import Providers from "@/components/providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const fontSerif = Cormorant_Garamond({
+	variable: "--font-serif",
+	subsets: ["latin"],
+	weight: ["300", "400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const fontSans = Plus_Jakarta_Sans({
+	variable: "--font-sans",
+	subsets: ["latin"],
+	weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "my-better-t-app",
-  description: "my-better-t-app",
+	title: "my-better-t-app",
+	description: "my-better-t-app",
 };
 
 export default function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>
-          <div className="grid grid-rows-[auto_1fr] h-svh">
-            <Header />
-            {children}
-          </div>
-        </Providers>
-      </body>
-    </html>
-  );
+	return (
+		<html lang="en" suppressHydrationWarning>
+			<body
+				className={`${fontSans.variable} ${fontSerif.variable} font-sans antialiased`}
+			>
+				<Providers>
+					<div className="grid h-svh grid-rows-[auto_1fr]">
+						<Header />
+						{children}
+					</div>
+				</Providers>
+			</body>
+		</html>
+	);
 }
