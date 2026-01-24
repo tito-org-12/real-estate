@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { orpc } from "@/utils/orpc";
+import ReactFlowDemo from "@/components/flow/ReactFlowDemo";
 
 export default function Dashboard({
   customerState,
@@ -30,6 +31,8 @@ export default function Dashboard({
           Upgrade to Pro
         </Button>
       )}
+
+ 
     </>
   );
 }

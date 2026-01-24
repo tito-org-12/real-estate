@@ -2,6 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { orpc } from "@/utils/orpc";
+import ReactFlowDemo from "@/components/flow/ReactFlowDemo";
 
 const TITLE_TEXT = `
  ██████╗ ███████╗████████╗████████╗███████╗██████╗
@@ -32,14 +33,23 @@ export default function Home() {
             <div
               className={`h-2 w-2 rounded-full ${healthCheck.data ? "bg-green-500" : "bg-red-500"}`}
             />
-            <span className="text-sm text-muted-foreground">
-              {healthCheck.isLoading
-                ? "Checking..."
-                : healthCheck.data
-                  ? "Connected"
-                  : "Disconnected"}
-            </span>
-          </div>
+                              {/* React Flow Demo Section */}
+                    <div className="flex flex-col w-100vw items-center justify-center ">
+                      <div style={{ marginTop: "2rem" }} className="w-full">
+                        <h2 style={{ marginBottom: "1rem", fontSize: "1.5rem", fontWeight: "bold" }}>
+                          React Flow Demo
+                        </h2>
+                        <ReactFlowDemo />
+                      </div>
+                            <span className="text-sm text-muted-foreground">
+                              {healthCheck.isLoading
+                                ? "Checking..."
+                                : healthCheck.data
+                                  ? "Connected"
+                                  : "Disconnected"}
+                            </span>
+                                </div>
+                    </div>
         </section>
       </div>
     </div>
