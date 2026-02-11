@@ -10,6 +10,8 @@ import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { handle } from "hono/vercel";
+
 
 const app = new Hono();
 
@@ -26,22 +28,22 @@ app.use(
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
-export const apiHandler = new OpenAPIHandler(appRouter, {
+export const apiHandler:any = new OpenAPIHandler(appRouter, {
 	plugins: [
 		new OpenAPIReferencePlugin({
 			schemaConverters: [new ZodToJsonSchemaConverter()],
 		}),
 	],
 	interceptors: [
-		onError((error) => {
+		onError((error:any) => {
 			console.error(error);
 		}),
 	],
 });
 
-export const rpcHandler = new RPCHandler(appRouter, {
+export const rpcHandler:any = new RPCHandler(appRouter, {
 	interceptors: [
-		onError((error) => {
+		onError((error:any) => {
 			console.error(error);
 		}),
 	],
@@ -88,3 +90,11 @@ serve(
 		console.log(`Server is running on http://localhost:${info.port}`);
 	},
 );
+
+const handler = handle(app);
+
+export const GET = handler;
+export const POST = handler;
+export const PATCH = handler;
+export const PUT = handler;
+export const OPTIONS = handler;
