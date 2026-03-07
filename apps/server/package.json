@@ -22,6 +22,7 @@
     "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",
     "better-auth": "catalog:",
+    "cloudinary": "^2.8.0",
     "dotenv": "catalog:",
     "drizzle-orm": "^0.45.1",
     "hono": "catalog:",

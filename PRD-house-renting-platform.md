@@ -300,6 +300,12 @@ Rental discovery is often fragmented, outdated, and low-trust. Renters waste tim
 3. What minimum listing-quality threshold blocks publishing?
 4. When should paid plans be enabled relative to liquidity milestones?
 
+### Phase 0 Resolution Snapshot (March 2026)
+
+- Pilot lock: Riyadh + SAR
+- Inquiry policy: guest submissions allowed
+- Event naming convention: `snake_case`
+
 ---
 
 ## Appendix — Alignment to Current Product Foundation
