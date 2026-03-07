@@ -1,5 +1,5 @@
 import { listings, listingTypeEnum } from "@my-better-t-app/db/schema";
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { and, asc, desc, eq, gte, ilike, lte, or } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure, publicProcedure } from "../index";
 
@@ -8,8 +8,12 @@ export const listingRouter = {
     .input(
       z.object({
         type: z.enum(listingTypeEnum.enumValues).optional(),
+        search: z.string().trim().min(1).optional(),
         minPrice: z.number().optional(),
         maxPrice: z.number().optional(),
+        sortBy: z
+          .enum(["recency", "price_asc", "price_desc"])
+          .default("recency"),
         limit: z.number().default(20),
         cursor: z.number().default(0), // Simple offset for now
       }),
@@ -21,18 +25,31 @@ export const listingRouter = {
       if (input.type) {
         filters.push(eq(listings.type, input.type));
       }
-      if (input.minPrice) {
+      if (input.search) {
+        const term = `%${input.search}%`;
+        filters.push(
+          or(ilike(listings.title, term), ilike(listings.location, term))!,
+        );
+      }
+      if (input.minPrice !== undefined) {
         filters.push(gte(listings.price, input.minPrice));
       }
-      if (input.maxPrice) {
+      if (input.maxPrice !== undefined) {
         filters.push(lte(listings.price, input.maxPrice));
+      }
+
+      let orderBy = desc(listings.createdAt);
+      if (input.sortBy === "price_asc") {
+        orderBy = asc(listings.price);
+      } else if (input.sortBy === "price_desc") {
+        orderBy = desc(listings.price);
       }
 
       const items = await context.db.query.listings.findMany({
         where: and(...filters),
         limit: input.limit,
         offset: input.cursor,
-        orderBy: desc(listings.createdAt),
+        orderBy,
       });
 
       return items;

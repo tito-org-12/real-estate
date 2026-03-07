@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { CheckCircle2, MapPin, User } from "lucide-react";
+import { CheckCircle2, MapPin, Phone, User } from "lucide-react";
 import { use, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { trackPhase0Event } from "@/lib/analytics";
@@ -39,6 +39,9 @@ export default function ListingDetailsPage({
     orpc.inquiries.create.mutationOptions({
       onSuccess: () => {
         trackPhase0Event("inquiry_submitted", {
+          listingId: id,
+        });
+        trackPhase0Event("request_details_submitted" as any, {
           listingId: id,
         });
         toast.success("Inquiry sent. The landlord has received your message.");
@@ -97,6 +100,32 @@ export default function ListingDetailsPage({
 
   const coverImage =
     listing.images[0] || "https://placehold.co/1200x800?text=No+Image";
+  const referenceNumber = `NST-${listing.id.slice(0, 8).toUpperCase()}`;
+  const publishedAt = new Date(listing.createdAt);
+  const expiresAt = new Date(publishedAt);
+  expiresAt.setDate(expiresAt.getDate() + 30);
+  const whatsappNumber = String(listing.meta?.whatsapp ?? "").replaceAll(
+    /\s+/g,
+    "",
+  );
+  const contactPhone = String(listing.meta?.phone ?? "").replaceAll(/\s+/g, "");
+  const whatsappText = `Hello, I'm interested in ${listing.title} (${referenceNumber})`;
+  const normalizedWhatsappNumber = whatsappNumber.replace(/^\+/, "");
+  const whatsappHref = whatsappNumber
+    ? `https://wa.me/${normalizedWhatsappNumber}?text=${encodeURIComponent(whatsappText)}`
+    : null;
+  const phoneHref = contactPhone ? `tel:${contactPhone}` : null;
+  const hiddenMetaKeys = new Set([
+    "imagePublicId",
+    "publicId",
+    "image_public_id",
+    "cloudinaryPublicId",
+    "cloudinary_public_id",
+  ]);
+  const displayMetaEntries = Object.entries(listing.meta ?? {}).filter(
+    ([key, value]) =>
+      !hiddenMetaKeys.has(key) && value !== null && value !== "",
+  );
 
   return (
     <div className='min-h-screen bg-background pb-20'>
@@ -129,6 +158,11 @@ export default function ListingDetailsPage({
                     Posted {new Date(listing.createdAt).toLocaleDateString()}
                   </span>
                 </div>
+                <div className='flex flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground text-xs uppercase tracking-widest'>
+                  <span>Ref {referenceNumber}</span>
+                  <span>Published {publishedAt.toLocaleDateString()}</span>
+                  <span>Expires {expiresAt.toLocaleDateString()}</span>
+                </div>
                 <h1 className='font-medium font-serif text-5xl text-foreground capitalize leading-none md:text-6xl'>
                   {listing.title}
                 </h1>
@@ -144,26 +178,28 @@ export default function ListingDetailsPage({
               </p>
             </div>
 
-            <div className='pt-8'>
-              <h3 className='mb-8 font-medium font-serif text-3xl text-foreground'>
-                Details & Features
-              </h3>
-              <div className='grid grid-cols-2 gap-6 md:grid-cols-3'>
-                {Object.entries(listing.meta).map(([key, value]) => (
-                  <div
-                    key={key}
-                    className='rounded-xl border border-border/40 bg-card p-5 transition-all duration-300 hover:shadow-md'
-                  >
-                    <div className='mb-2 font-medium text-muted-foreground text-xs uppercase tracking-widest'>
-                      {key.replace(/([A-Z])/g, " $1").trim()}
+            {displayMetaEntries.length > 0 && (
+              <div className='pt-8'>
+                <h3 className='mb-8 font-medium font-serif text-3xl text-foreground'>
+                  Details & Features
+                </h3>
+                <div className='grid grid-cols-2 gap-6 md:grid-cols-3'>
+                  {displayMetaEntries.map(([key, value]) => (
+                    <div
+                      key={key}
+                      className='rounded-xl border border-border/40 bg-card p-5 transition-all duration-300 hover:shadow-md'
+                    >
+                      <div className='mb-2 font-medium text-muted-foreground text-xs uppercase tracking-widest'>
+                        {key.replaceAll(/([A-Z])/g, " $1").trim()}
+                      </div>
+                      <div className='font-serif text-2xl text-foreground capitalize'>
+                        {value?.toString()}
+                      </div>
                     </div>
-                    <div className='font-serif text-2xl text-foreground capitalize'>
-                      {value?.toString()}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className='lg:col-span-4'>
@@ -236,6 +272,50 @@ export default function ListingDetailsPage({
                       ? "Sending..."
                       : "I'm Interested"}
                   </Button>
+                  <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                    <Button
+                      type='button'
+                      variant='outline'
+                      className='h-12'
+                      disabled={!whatsappHref}
+                      onClick={() => {
+                        if (!whatsappHref) return;
+                        trackPhase0Event("contact_whatsapp_clicked" as any, {
+                          listingId: id,
+                          referenceNumber,
+                        });
+                        globalThis.open(
+                          whatsappHref,
+                          "_blank",
+                          "noopener,noreferrer",
+                        );
+                      }}
+                    >
+                      WhatsApp
+                    </Button>
+                    <Button
+                      type='button'
+                      variant='outline'
+                      className='h-12'
+                      disabled={!phoneHref}
+                      onClick={() => {
+                        if (!phoneHref) return;
+                        trackPhase0Event("contact_call_clicked" as any, {
+                          listingId: id,
+                          referenceNumber,
+                        });
+                        globalThis.location.href = phoneHref;
+                      }}
+                    >
+                      <Phone className='mr-2 h-4 w-4' />
+                      Call
+                    </Button>
+                  </div>
+                  {!whatsappHref && !phoneHref && (
+                    <p className='text-center text-muted-foreground text-xs'>
+                      Contact number not provided by landlord for this listing.
+                    </p>
+                  )}
                 </form>
 
                 <div className='mt-8 flex items-center gap-4 border-border/40 border-t pt-6'>

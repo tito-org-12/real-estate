@@ -9,6 +9,9 @@ export const PHASE0_EVENT_DICTIONARY = {
   inquiry_cta_clicked: "User tapped inquiry action",
   inquiry_submitted: "Inquiry saved successfully",
   inquiry_submit_failed: "Inquiry submit failed",
+  contact_whatsapp_clicked: "User clicked WhatsApp CTA",
+  contact_call_clicked: "User clicked call CTA",
+  request_details_submitted: "User submitted request details form",
 } as const;
 
 export type Phase0EventName = keyof typeof PHASE0_EVENT_DICTIONARY;

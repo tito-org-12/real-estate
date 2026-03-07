@@ -31,7 +31,7 @@ Nestora becomes the centralized, trusted hub for rental discovery where seekers 
 - Improve speed from search to first contact.
 - Increase trust through listing verification and quality guardrails.
 - Support both individual owners and professional advertisers.
-- Create monetization paths without hurting listing supply.
+- Keep launch access simple and free for all core marketplace features.
 
 ## Market Assumptions (Locked)
 
@@ -64,12 +64,9 @@ Nestora becomes the centralized, trusted hub for rental discovery where seekers 
 
 ### 2. Listing Lifecycle and Management
 
-- Multi-tier listing plans:
-  - Free
-  - Standard
-  - Premium (featured placement)
-  - Professional Broker
-  - Institutional
+- Single launch access model:
+  - all listing and dashboard capabilities are available without payment gates
+  - feature depth is controlled by product readiness, not access tiers
 - Listing status model:
   - draft, pending_review, active, expired, rejected, archived
 - Listing metadata:
@@ -113,20 +110,12 @@ Nestora becomes the centralized, trusted hub for rental discovery where seekers 
 - Optional video attachment/request workflow
 - Geolocation and map display on listing pages
 
-### 6. Content and Education Hub
-
-- News/blog module with categories:
-  - market trends
-  - legal and compliance guidance
-  - investment and renting tips
-- Newsletter subscription for retention and nurturing
-
-### 7. Advertiser Ecosystem
+### 6. Advertiser Ecosystem
 
 - Advertisers directory page for verified agencies and independent agents
 - Agency profile pages with active listings and trust signals
 
-### 8. Utility and Compliance
+### 7. Utility and Compliance
 
 - FAQ/help center
 - Privacy policy and terms
@@ -139,7 +128,7 @@ Nestora becomes the centralized, trusted hub for rental discovery where seekers 
 2. User applies search filters and browses listing cards.
 3. User opens listing detail to evaluate media, details, and trust signals.
 4. User converts using WhatsApp, call, or request form.
-5. User enters nurturing path through account signup or newsletter subscription.
+5. User can optionally create an account for future activity tracking.
 
 ## Functional Requirements
 
@@ -153,7 +142,7 @@ Nestora becomes the centralized, trusted hub for rental discovery where seekers 
 ### FR-02 Listing Creation and Plans
 
 - System shall enforce plan-based limits and visibility rules.
-- System shall support free and paid listing tiers with entitlement checks.
+- System shall provide one free access tier during launch phases.
 - System shall generate unique listing reference numbers.
 
 ### FR-03 Listing Detail
@@ -179,17 +168,12 @@ Nestora becomes the centralized, trusted hub for rental discovery where seekers 
 - System shall provide bulk operations for brokers (edit status, renew, archive).
 - System shall surface listing and lead metrics by date range.
 
-### FR-07 Content Hub
-
-- System shall allow publishing and managing blog/news articles.
-- System shall support SEO metadata and category taxonomy for content pages.
-
-### FR-08 Directory and Profiles
+### FR-07 Directory and Profiles
 
 - System shall provide searchable advertiser directory.
 - System shall expose profile trust indicators (verified status, responsiveness, active listings).
 
-### FR-09 Growth Features (Transaction-Enabler)
+### FR-08 Growth Features (Transaction-Enabler)
 
 - Online viewing booking calendar and scheduling workflow.
 - Mortgage calculator module with configurable local bank assumptions.
@@ -215,7 +199,6 @@ Nestora becomes the centralized, trusted hub for rental discovery where seekers 
 - detail-to-contact conversion rate by channel
 - time-to-first-response by advertiser segment
 - stale listing rate
-- paid plan conversion rate
 
 ### Required Event Set (Minimum)
 
@@ -230,7 +213,6 @@ Nestora becomes the centralized, trusted hub for rental discovery where seekers 
 - `listing_verified`
 - `listing_expired`
 - `listing_renewed`
-- `newsletter_subscribed`
 - `viewing_booking_created`
 - `mortgage_calculator_used`
 - `agent_review_submitted`
@@ -243,8 +225,7 @@ Nestora becomes the centralized, trusted hub for rental discovery where seekers 
 - For Rent
 - For Sale
 - Auction
-- Services (Pricing Plans)
-- News/Blog
+- Services
 - About Us
 - Contact
 
@@ -261,7 +242,6 @@ Nestora becomes the centralized, trusted hub for rental discovery where seekers 
 - Privacy Policy
 - Terms
 - Mobile App Download
-- Newsletter Subscription
 
 ## Phase Plan (Updated)
 
@@ -293,8 +273,7 @@ Launch high-intent discovery and multi-channel lead conversion.
 - Advanced search and filters.
 - Listing detail with ref number and publish/expiry dates.
 - WhatsApp/call/request-details CTAs.
-- Basic free vs premium visibility controls.
-- News/blog baseline and newsletter capture.
+- Baseline visibility controls based on quality and recency.
 
 ### Exit Criteria
 
@@ -321,25 +300,23 @@ Increase trust and operational maturity for scale.
 - stale listing rate reduced versus phase 1 baseline.
 - broker workflows usable on desktop and mobile.
 
-## Phase 3 - Monetization and Enablers (Weeks 11-14)
+## Phase 3 - Growth Enablers (Weeks 11-14)
 
 ### Objective
 
-Monetize visibility and add transaction-enabler tools.
+Deepen conversion tools and operational maturity while keeping launch access free.
 
 ### Deliverables
 
-- Paid plans and entitlements (standard, premium, professional, institutional).
-- Featured placement and reporting.
+- Enhanced listing reporting and quality-based ranking signals.
 - Online viewing booking.
 - Mortgage calculator.
 - Agent review and rating system.
 
 ### Exit Criteria
 
-- billing and entitlement reconciliation passes.
 - feature flags and rollback plans validated.
-- no material liquidity drop after monetization rollout.
+- no material liquidity drop after growth feature rollout.
 
 ## Phase 4 - Scale and Expansion (Quarter 2+)
 
@@ -365,15 +342,15 @@ Expand geography, channels, and ecosystem defensibility.
   - renter D30 retention `>= 20%`
   - stale listing rate reduced by `30%` from phase 1 baseline
 - Phase 3:
-  - paid conversion `5-10%` within 6 months
-  - no significant drop in listing activation after paid rollout
+  - booking and calculator adoption show steady week-over-week growth
+  - no significant drop in listing activation after growth feature rollout
 
 ## Open Decisions to Lock Before Build
 
 1. Rwanda launch regions and neighborhood coverage priority.
 2. Whether sale and auction are enabled at launch or feature-flagged post-launch.
 3. Verification SLA and staffing model (manual-first vs hybrid automation).
-4. Paid plan pricing and free-tier listing limits.
+4. Visibility policy tuning for quality, freshness, and relevance.
 5. Local bank assumptions for mortgage calculator.
 
 ## Immediate Next Actions

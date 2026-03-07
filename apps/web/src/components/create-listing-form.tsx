@@ -42,6 +42,8 @@ export function CreateListingForm() {
     bathrooms: "",
     sqft: "",
     neighborhood: "",
+    phone: "",
+    whatsapp: "",
   });
 
   const createMutation = useMutation(
@@ -111,6 +113,8 @@ export function CreateListingForm() {
     const description = formData.description.trim();
     const location = formData.location.trim();
     const neighborhood = formData.neighborhood.trim();
+    const phone = formData.phone.trim();
+    const whatsapp = formData.whatsapp.trim();
     const parsedPrice = Number.parseFloat(formData.price);
     if (Number.isNaN(parsedPrice) || parsedPrice <= 0) {
       toast.error("Please enter a valid monthly rent amount.");
@@ -140,6 +144,8 @@ export function CreateListingForm() {
       bathrooms,
       sqft,
       neighborhood: formData.neighborhood,
+      ...(phone ? { phone } : {}),
+      ...(whatsapp ? { whatsapp } : {}),
       ...(imagePublicId ? { imagePublicId } : {}),
     };
 
@@ -418,6 +424,40 @@ export function CreateListingForm() {
                     name='neighborhood'
                     placeholder='Al Olaya'
                     value={formData.neighborhood}
+                    onChange={handleChange}
+                    className='h-10 border-border/60 bg-muted/20 focus:border-primary/50'
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <Label
+                    htmlFor='phone'
+                    className='text-muted-foreground text-xs uppercase tracking-wider'
+                  >
+                    Contact Phone (optional)
+                  </Label>
+                  <Input
+                    id='phone'
+                    name='phone'
+                    type='tel'
+                    placeholder='+250788123456'
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className='h-10 border-border/60 bg-muted/20 focus:border-primary/50'
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <Label
+                    htmlFor='whatsapp'
+                    className='text-muted-foreground text-xs uppercase tracking-wider'
+                  >
+                    WhatsApp Number (optional)
+                  </Label>
+                  <Input
+                    id='whatsapp'
+                    name='whatsapp'
+                    type='tel'
+                    placeholder='+250788123456'
+                    value={formData.whatsapp}
                     onChange={handleChange}
                     className='h-10 border-border/60 bg-muted/20 focus:border-primary/50'
                   />

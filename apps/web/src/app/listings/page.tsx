@@ -21,6 +21,34 @@ import { Slider } from "@/components/ui/slider";
 import { orpc } from "@/utils/orpc";
 
 type ListingTypeFilter = "all" | "apartment" | "house" | "villa" | "studio";
+type SortFilter = "recommended" | "newest" | "priceLowHigh" | "priceHighLow";
+
+function computeQualityScore(listing: any) {
+  const imageScore = Math.min((listing.images?.length ?? 0) * 10, 40);
+  const descriptionScore = listing.description ? 20 : 0;
+  const metaScore = Object.keys(listing.meta ?? {}).length * 5;
+  const freshnessDays =
+    (Date.now() - new Date(listing.createdAt).getTime()) /
+    (1000 * 60 * 60 * 24);
+  const freshnessScore = Math.max(0, 30 - Math.min(30, freshnessDays));
+  return (
+    imageScore + descriptionScore + Math.min(metaScore, 30) + freshnessScore
+  );
+}
+
+function mapSortToApi(
+  sortBy: SortFilter,
+): "recency" | "price_asc" | "price_desc" {
+  if (sortBy === "priceLowHigh") {
+    return "price_asc";
+  }
+
+  if (sortBy === "priceHighLow") {
+    return "price_desc";
+  }
+
+  return "recency";
+}
 
 function ListingsPageLoading() {
   return (
@@ -58,6 +86,7 @@ function ListingsContent() {
     setSearch(urlSearch);
   }, [searchParams]);
   const [type, setType] = useState<ListingTypeFilter>("all");
+  const [sortBy, setSortBy] = useState<SortFilter>("recommended");
   const [priceRange, setPriceRange] = useState([0, 100000]);
 
   const apiListingType =
@@ -67,6 +96,8 @@ function ListingsContent() {
     type === "studio"
       ? type
       : undefined;
+
+  const apiSortBy = mapSortToApi(sortBy);
 
   useEffect(() => {
     trackPhase0Event("listing_list_viewed", {
@@ -78,21 +109,20 @@ function ListingsContent() {
     orpc.listings.list.queryOptions({
       input: {
         type: apiListingType,
+        search: search.trim() || undefined,
+        minPrice: priceRange[0] * 100,
+        maxPrice: priceRange[1] * 100,
+        sortBy: apiSortBy,
       },
-      // Search is client-side filtered for MVP or could be added to API later
     }),
   );
 
-  const filteredListings = listings?.filter((l: any) => {
-    const searchLower = search.toLowerCase();
-    const matchesSearch =
-      l.title.toLowerCase().includes(searchLower) ||
-      l.location?.toLowerCase().includes(searchLower);
-    const matchesPrice =
-      l.price >= priceRange[0] * 100 && // Convert input to cents
-      l.price <= priceRange[1] * 100;
-    return matchesSearch && matchesPrice;
-  });
+  const filteredListings =
+    sortBy === "recommended"
+      ? [...(listings ?? [])].sort(
+          (a: any, b: any) => computeQualityScore(b) - computeQualityScore(a),
+        )
+      : listings;
 
   return (
     <div className='min-h-screen bg-background'>
@@ -149,6 +179,7 @@ function ListingsContent() {
                 onClick={() => {
                   setSearch("");
                   setType("all");
+                  setSortBy("recommended");
                   setPriceRange([0, 100000]);
                 }}
                 className='text-muted-foreground text-xs uppercase tracking-widest transition-colors hover:text-primary'
@@ -175,6 +206,30 @@ function ListingsContent() {
                     <SelectItem value='house'>House</SelectItem>
                     <SelectItem value='villa'>Villa</SelectItem>
                     <SelectItem value='studio'>Studio</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className='space-y-3'>
+                <Label className='font-medium text-muted-foreground text-xs uppercase tracking-widest'>
+                  Sort By
+                </Label>
+                <Select
+                  value={sortBy}
+                  onValueChange={(val) => setSortBy(val as SortFilter)}
+                >
+                  <SelectTrigger className='h-11 border-border/60 bg-background transition-colors focus:border-primary/50 focus:ring-0'>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='recommended'>Recommended</SelectItem>
+                    <SelectItem value='newest'>Newest</SelectItem>
+                    <SelectItem value='priceLowHigh'>
+                      Price: Low to High
+                    </SelectItem>
+                    <SelectItem value='priceHighLow'>
+                      Price: High to Low
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
