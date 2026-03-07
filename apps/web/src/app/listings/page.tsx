@@ -1,11 +1,11 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Search } from "lucide-react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { trackPhase0Event } from "@/lib/analytics";
-import { formatCurrency, PILOT_CITY } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import { ListingCard } from "@/components/listing-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,10 +53,8 @@ function mapSortToApi(
 function ListingsPageLoading() {
   return (
     <div className='min-h-screen bg-background'>
-      <div className='relative flex h-[40vh] min-h-[400px] w-full items-center justify-center overflow-hidden'>
-        <div className='absolute inset-0 z-0 animate-pulse bg-muted' />
-      </div>
-      <div className='container mx-auto max-w-[1600px] px-4 py-12'>
+      <div className='container mx-auto max-w-[1600px] px-4 py-10 md:px-6'>
+        <div className='mb-8 h-16 animate-pulse rounded-xl bg-muted' />
         <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className='h-64 animate-pulse rounded-lg bg-muted' />
@@ -88,6 +86,7 @@ function ListingsContent() {
   const [type, setType] = useState<ListingTypeFilter>("all");
   const [sortBy, setSortBy] = useState<SortFilter>("recommended");
   const [priceRange, setPriceRange] = useState([0, 100000]);
+  const [showPricePanel, setShowPricePanel] = useState(false);
 
   const apiListingType =
     type === "apartment" ||
@@ -126,139 +125,110 @@ function ListingsContent() {
 
   return (
     <div className='min-h-screen bg-background'>
-      {/* Hero Section */}
-      <div className='relative flex h-[40vh] min-h-[400px] w-full items-center justify-center overflow-hidden'>
-        {/* Background Image */}
-        <div className='absolute inset-0 z-0'>
-          <img
-            src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2670&auto=format&fit=crop'
-            alt='Luxury Home'
-            className='h-full w-full object-cover opacity-90'
-          />
-          <div className='absolute inset-0 bg-black/40' />
-        </div>
-
-        <div className='relative z-10 w-full max-w-4xl animate-fade-up space-y-8 px-4 text-center'>
-          <div className='space-y-4'>
-            <h1 className='font-medium font-serif text-5xl text-white tracking-tight drop-shadow-sm md:text-6xl lg:text-7xl'>
-              Find Your Next Rental Home
-            </h1>
-            <p className='font-light text-lg text-white/80 tracking-wide md:text-xl'>
-              Browse verified homes across {PILOT_CITY}.
-            </p>
-          </div>
-
-          <div className='relative mx-auto max-w-2xl'>
-            <div className='flex items-center rounded-full border border-white/20 bg-background/95 p-2 shadow-2xl backdrop-blur-md transition-all duration-300 focus-within:ring-2 focus-within:ring-primary/50'>
-              <Search className='ml-4 h-5 w-5 text-muted-foreground' />
+      <div className='container mx-auto max-w-[1600px] px-4 py-10 md:px-6'>
+        <div className='mb-8 rounded-xl border border-border/60 bg-card p-3 shadow-lg'>
+          <div className='flex flex-wrap items-center gap-3'>
+            <div className='relative min-w-[280px] flex-1'>
+              <Search className='pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
               <Input
-                className='h-12 border-0 bg-transparent text-base shadow-none placeholder:text-muted-foreground/60 focus-visible:ring-0 focus-visible:ring-offset-0'
+                className='h-11 border-border/60 bg-background pr-10 pl-9 placeholder:text-muted-foreground/70 focus-visible:ring-primary/40'
                 placeholder='Search by neighborhood, tower, or keyword...'
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-              <Button
-                size='icon'
-                className='h-10 w-10 shrink-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90'
-              >
-                <Search className='h-4 w-4' />
-              </Button>
+              {search && (
+                <button
+                  type='button'
+                  onClick={() => setSearch("")}
+                  className='absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground'
+                  aria-label='Clear search'
+                >
+                  <X className='h-4 w-4' />
+                </button>
+              )}
             </div>
+
+            <Select
+              value={type}
+              onValueChange={(val) => setType(val as ListingTypeFilter)}
+            >
+              <SelectTrigger className='h-11 min-w-[170px] border-border/60 bg-background'>
+                <SelectValue placeholder='Category' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='all'>All Home Types</SelectItem>
+                <SelectItem value='apartment'>Apartment</SelectItem>
+                <SelectItem value='house'>House</SelectItem>
+                <SelectItem value='villa'>Villa</SelectItem>
+                <SelectItem value='studio'>Studio</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={sortBy}
+              onValueChange={(val) => setSortBy(val as SortFilter)}
+            >
+              <SelectTrigger className='h-11 min-w-[190px] border-border/60 bg-background'>
+                <SelectValue placeholder='Sort By' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='recommended'>Recommended</SelectItem>
+                <SelectItem value='newest'>Newest</SelectItem>
+                <SelectItem value='priceLowHigh'>Price: Low to High</SelectItem>
+                <SelectItem value='priceHighLow'>Price: High to Low</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button
+              type='button'
+              variant='outline'
+              className='h-11 border-border/60 bg-background hover:bg-accent'
+              onClick={() => setShowPricePanel((current) => !current)}
+            >
+              <SlidersHorizontal className='mr-2 h-4 w-4' />
+              Price
+            </Button>
+
+            <Button
+              type='button'
+              variant='outline'
+              className='h-11 border-border/60 bg-background hover:bg-accent'
+              onClick={() => {
+                setSearch("");
+                setType("all");
+                setSortBy("recommended");
+                setPriceRange([0, 100000]);
+                setShowPricePanel(false);
+              }}
+            >
+              Clear All
+            </Button>
           </div>
+
+          {showPricePanel && (
+            <div className='mt-4 rounded-lg border border-border/60 bg-background p-4'>
+              <div className='mb-3 flex items-center justify-between'>
+                <Label className='font-medium text-muted-foreground text-xs uppercase tracking-widest'>
+                  Price Range
+                </Label>
+                <span className='font-mono text-primary text-xs'>
+                  {formatCurrency(priceRange[0])} -{" "}
+                  {formatCurrency(priceRange[1])}
+                </span>
+              </div>
+              <Slider
+                min={0}
+                max={100000}
+                step={500}
+                value={priceRange}
+                onValueChange={(val) => setPriceRange(val as number[])}
+                className='py-2'
+              />
+            </div>
+          )}
         </div>
-      </div>
 
-      <div className='container mx-auto flex max-w-[1600px] flex-col gap-10 px-4 py-12 md:flex-row md:px-6'>
-        {/* Sidebar Filters */}
-        <aside className='w-full shrink-0 space-y-10 pr-4 md:sticky md:top-24 md:h-[calc(100vh-6rem)] md:w-72 md:overflow-y-auto'>
-          <div>
-            <div className='mb-6 flex items-center justify-between'>
-              <h3 className='font-serif text-2xl text-foreground'>Refine</h3>
-              <button
-                type='button'
-                onClick={() => {
-                  setSearch("");
-                  setType("all");
-                  setSortBy("recommended");
-                  setPriceRange([0, 100000]);
-                }}
-                className='text-muted-foreground text-xs uppercase tracking-widest transition-colors hover:text-primary'
-              >
-                Clear all
-              </button>
-            </div>
-
-            <div className='space-y-8'>
-              <div className='space-y-3'>
-                <Label className='font-medium text-muted-foreground text-xs uppercase tracking-widest'>
-                  Category
-                </Label>
-                <Select
-                  value={type}
-                  onValueChange={(val) => setType(val as ListingTypeFilter)}
-                >
-                  <SelectTrigger className='h-11 border-border/60 bg-background transition-colors focus:border-primary/50 focus:ring-0'>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='all'>All Home Types</SelectItem>
-                    <SelectItem value='apartment'>Apartment</SelectItem>
-                    <SelectItem value='house'>House</SelectItem>
-                    <SelectItem value='villa'>Villa</SelectItem>
-                    <SelectItem value='studio'>Studio</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className='space-y-3'>
-                <Label className='font-medium text-muted-foreground text-xs uppercase tracking-widest'>
-                  Sort By
-                </Label>
-                <Select
-                  value={sortBy}
-                  onValueChange={(val) => setSortBy(val as SortFilter)}
-                >
-                  <SelectTrigger className='h-11 border-border/60 bg-background transition-colors focus:border-primary/50 focus:ring-0'>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='recommended'>Recommended</SelectItem>
-                    <SelectItem value='newest'>Newest</SelectItem>
-                    <SelectItem value='priceLowHigh'>
-                      Price: Low to High
-                    </SelectItem>
-                    <SelectItem value='priceHighLow'>
-                      Price: High to Low
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className='space-y-4'>
-                <div className='flex items-center justify-between'>
-                  <Label className='font-medium text-muted-foreground text-xs uppercase tracking-widest'>
-                    Price Range
-                  </Label>
-                  <span className='font-mono text-primary text-xs'>
-                    {formatCurrency(priceRange[0])} —{" "}
-                    {formatCurrency(priceRange[1])}
-                  </span>
-                </div>
-                <Slider
-                  min={0}
-                  max={100000}
-                  step={500}
-                  value={priceRange}
-                  onValueChange={(val) => setPriceRange(val as number[])}
-                  className='py-4'
-                />
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        {/* Listings Grid */}
-        <main className='flex-1'>
+        <main>
           {isLoading ? (
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
               {[1, 2, 3, 4, 5, 6].map((i) => (

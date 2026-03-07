@@ -115,6 +115,15 @@ export default function ListingDetailsPage({
     ? `https://wa.me/${normalizedWhatsappNumber}?text=${encodeURIComponent(whatsappText)}`
     : null;
   const phoneHref = contactPhone ? `tel:${contactPhone}` : null;
+  const mapHref = listing.location
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(listing.location)}`
+    : null;
+  let verificationLabel = "Pending Verification";
+  if (listing.trust.verificationStatus === "verified") {
+    verificationLabel = "Verified Listing";
+  } else if (listing.trust.verificationStatus === "needs_review") {
+    verificationLabel = "Under Review";
+  }
   const hiddenMetaKeys = new Set([
     "imagePublicId",
     "publicId",
@@ -162,6 +171,8 @@ export default function ListingDetailsPage({
                   <span>Ref {referenceNumber}</span>
                   <span>Published {publishedAt.toLocaleDateString()}</span>
                   <span>Expires {expiresAt.toLocaleDateString()}</span>
+                  <span>Verification {listing.trust.verificationStatus}</span>
+                  {listing.trust.isStale && <span>Needs revalidation</span>}
                 </div>
                 <h1 className='font-medium font-serif text-5xl text-foreground capitalize leading-none md:text-6xl'>
                   {listing.title}
@@ -176,6 +187,16 @@ export default function ListingDetailsPage({
               <p className='whitespace-pre-wrap font-light text-foreground/80 text-xl leading-relaxed'>
                 {listing.description || "No description provided."}
               </p>
+              {mapHref && (
+                <a
+                  href={mapHref}
+                  target='_blank'
+                  rel='noreferrer'
+                  className='mt-4 inline-flex text-primary text-sm underline-offset-4 hover:underline'
+                >
+                  View location on map
+                </a>
+              )}
             </div>
 
             {displayMetaEntries.length > 0 && (
@@ -328,7 +349,7 @@ export default function ListingDetailsPage({
                     </div>
                     <div className='flex items-center gap-1 text-muted-foreground text-sm'>
                       <CheckCircle2 className='h-3 w-3 text-green-600' />
-                      Verified Member
+                      {verificationLabel}
                     </div>
                   </div>
                 </div>

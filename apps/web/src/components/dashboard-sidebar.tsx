@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 
 interface SidebarProps {
   userName: string;
-  hasProSubscription: boolean;
 }
 
 const NAVIGATION_ITEMS = [
@@ -28,10 +27,7 @@ const NAVIGATION_ITEMS = [
   },
 ];
 
-export function DashboardSidebar({
-  userName,
-  hasProSubscription,
-}: SidebarProps) {
+export function DashboardSidebar({ userName }: SidebarProps) {
   const pathname = usePathname();
 
   const handleSignOut = async () => {
@@ -49,13 +45,7 @@ export function DashboardSidebar({
           </div>
           <div className='min-w-0 flex-1'>
             <p className='truncate font-medium text-sm'>{userName}</p>
-            <p className='text-muted-foreground text-xs'>
-              {hasProSubscription ? (
-                <span className='font-medium text-primary'>Pro Member</span>
-              ) : (
-                "Starter Plan"
-              )}
-            </p>
+            <p className='text-muted-foreground text-xs'>Free Access</p>
           </div>
         </div>
       </div>
@@ -96,15 +86,6 @@ export function DashboardSidebar({
 
       {/* Bottom Section */}
       <div className='space-y-3 border-border/40 border-t p-4'>
-        {!hasProSubscription && (
-          <Button
-            onClick={async () => await authClient.checkout({ slug: "pro" })}
-            className='w-full'
-            size='sm'
-          >
-            Upgrade to Pro
-          </Button>
-        )}
         <Button
           variant='ghost'
           size='sm'
