@@ -42,14 +42,14 @@ export function Hero() {
       <div className='container mx-auto max-w-[1100px] px-4 text-center md:px-6'>
         {/* Tagline */}
         <span className='mb-6 inline-block font-semibold text-primary text-xs uppercase tracking-[0.2em] md:text-sm'>
-          Riyadh House Rentals
+          Kigali House Rentals
         </span>
 
         {/* Headline */}
         <h1 className='mb-4 font-serif text-5xl text-foreground leading-[1.1] tracking-tight md:text-6xl lg:text-7xl'>
           Find your home
           <br />
-          <span className='text-primary italic'>in Riyadh.</span>
+          <span className='text-primary italic'>in Kigali.</span>
         </h1>
 
         {/* Subheadline */}

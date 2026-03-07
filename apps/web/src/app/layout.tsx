@@ -20,7 +20,7 @@ const fontSans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: "Nestora | House Renting Marketplace",
-  description: "Discover and publish rental homes in Riyadh.",
+  description: "Discover and publish rental homes in Kigali.",
 };
 
 export default function RootLayout({

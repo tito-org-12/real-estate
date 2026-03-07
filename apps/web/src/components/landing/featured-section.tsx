@@ -25,7 +25,7 @@ export function FeaturedSection() {
               Featured Rentals
             </h2>
             <p className='max-w-sm text-muted-foreground'>
-              Hand-picked homes ready for move-in across Riyadh.
+              Hand-picked homes ready for move-in across Kigali.
             </p>
           </div>
           <Link
@@ -79,7 +79,7 @@ export function FeaturedSection() {
               <div className='space-y-2'>
                 <div className='flex flex-col'>
                   <span className='mb-1 font-semibold text-primary text-xs uppercase tracking-widest'>
-                    {listing.location || "Riyadh"}
+                    {listing.location || "Kigali"}
                   </span>
                   <h3 className='font-medium font-serif text-3xl text-foreground transition-colors duration-300 group-hover:text-primary'>
                     {listing.title}

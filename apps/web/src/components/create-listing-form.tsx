@@ -259,7 +259,7 @@ export function CreateListingForm() {
                   <Input
                     id='location'
                     name='location'
-                    placeholder={`${PILOT_CITY}, Al Olaya`}
+                    placeholder={`${PILOT_CITY}, Kacyiru`}
                     required
                     value={formData.location}
                     onChange={handleChange}

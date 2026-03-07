@@ -41,8 +41,8 @@ Lock product scope to house-renting and stabilize core technical flows.
 
 ### Phase 0 Signed Assumptions (March 2026)
 
-- Pilot city: Riyadh
-- Currency: SAR
+- Pilot city: Kigali
+- Currency: RWF
 - Inquiry policy: guest inquiries are allowed
 - Event naming convention: `snake_case`
 - Event/KPI dictionary: `docs/event-dictionary-phase-0.md`

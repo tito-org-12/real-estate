@@ -5,8 +5,8 @@ Owners: Product + Engineering Lead
 
 ## Scope Decisions (Signed Off)
 
-- Pilot geography: Riyadh
-- Pilot currency: SAR
+- Pilot geography: Kigali
+- Pilot currency: RWF
 - Inquiry policy: guest inquiries are allowed
 - Event naming convention: snake_case
 - Roles: explicit renter and landlord
