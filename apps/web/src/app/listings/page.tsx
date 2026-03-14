@@ -63,6 +63,8 @@ function ListingsContent() {
 		orpc.listings.list.queryOptions({
 			input: {
 				type: type === "all" ? undefined : (type as any),
+				minPrice: priceRange[0] * 100, // Convert to cents
+				maxPrice: priceRange[1] * 100, // Convert to cents
 			},
 			// Search is client-side filtered for MVP or could be added to API later
 		}),
