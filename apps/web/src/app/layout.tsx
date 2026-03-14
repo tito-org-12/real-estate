@@ -19,8 +19,8 @@ const fontSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-	title: "my-better-t-app",
-	description: "my-better-t-app",
+	title: "Kigali Homes",
+	description: "Kigali Homes - Real Estate Platform",
 };
 
 export default function RootLayout({
