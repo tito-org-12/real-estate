@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: my-better-t-app-server
+    env: node
+    plan: free
+    buildCommand: pnpm install --frozen-lockfile && pnpm run build -F server
+    startCommand: cd apps/server && pnpm start
+    rootDir: .
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production

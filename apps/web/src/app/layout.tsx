@@ -19,8 +19,8 @@ const fontSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Nestora | House Renting Marketplace",
-  description: "Discover and publish rental homes in Kigali.",
+	title: "Kigali Homes",
+	description: "Kigali Homes - Real Estate Platform",
 };
 
 export default function RootLayout({
