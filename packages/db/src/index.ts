@@ -17,9 +17,7 @@ neonConfig.webSocketConstructor = ws;
 // To work in edge environments (Cloudflare Workers, Vercel Edge, etc.), enable querying over fetch
 // neonConfig.poolQueryViaFetch = true
 
-console.log('77777777777777777777777777777777777777777777777777',process.env.DATABASE_URL)
 const sql = neon(
-  process.env.DATABASE_URL ||
-    "postgresql://neondb_owner:npg_WtUqCazK10Do@ep-dawn-sun-ad6ds95v-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+  process.env.DATABASE_URL ||""
 );
 export const db = drizzle(sql, { schema });
