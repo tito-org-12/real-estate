@@ -2,6 +2,7 @@ import "dotenv/config";
 import { createContext } from "@my-better-t-app/api/context";
 import { appRouter } from "@my-better-t-app/api/routers/index";
 import { auth } from "@my-better-t-app/auth";
+import type { UploadApiErrorResponse, UploadApiResponse } from "cloudinary";
 import { OpenAPIHandler } from "@orpc/openapi/fetch";
 import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins";
 import { onError } from "@orpc/server";
@@ -11,84 +12,167 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { handle } from "hono/vercel";
-
+import cloudinary from "./lib/cloudinary";
 
 const app = new Hono();
+const MAX_IMAGE_SIZE_BYTES = 8 * 1024 * 1024;
+
+function validateImageFile(image: unknown): string | null {
+  if (!(image instanceof File)) {
+    return "No file provided";
+  }
+
+  if (!image.type.startsWith("image/")) {
+    return "Only image uploads are allowed";
+  }
+
+  if (image.size > MAX_IMAGE_SIZE_BYTES) {
+    return "Image must be 8MB or smaller";
+  }
+
+  return null;
+}
+
+async function uploadImageToCloudinary(
+  image: File,
+): Promise<UploadApiResponse> {
+  const arrayBuffer = await image.arrayBuffer();
+  const imageBuffer = Buffer.from(arrayBuffer);
+
+  return await new Promise<UploadApiResponse>((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "my-better-t-app/listings",
+        resource_type: "image",
+      },
+      (
+        error: UploadApiErrorResponse | undefined,
+        uploadResult: UploadApiResponse | undefined,
+      ) => {
+        if (error) {
+          reject(new Error(error.message || "Cloudinary upload failed"));
+          return;
+        }
+
+        if (!uploadResult) {
+          reject(new Error("Cloudinary did not return upload details"));
+          return;
+        }
+
+        resolve(uploadResult);
+      },
+    );
+
+    stream.end(imageBuffer);
+  });
+}
 
 app.use(logger());
 app.use(
-	"/*",
-	cors({
-		origin: process.env.CORS_ORIGIN || "",
-		allowMethods: ["GET", "POST", "OPTIONS"],
-		allowHeaders: ["Content-Type", "Authorization"],
-		credentials: true,
-	}),
+  "/*",
+  cors({
+    origin: process.env.CORS_ORIGIN || "",
+    allowMethods: ["GET", "POST", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  }),
 );
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
-export const apiHandler:any = new OpenAPIHandler(appRouter, {
-	plugins: [
-		new OpenAPIReferencePlugin({
-			schemaConverters: [new ZodToJsonSchemaConverter()],
-		}),
-	],
-	interceptors: [
-		onError((error:any) => {
-			console.error(error);
-		}),
-	],
+app.post("/upload/property-image", async (c) => {
+  const session = await auth.api.getSession({
+    headers: new Headers(c.req.header()),
+  });
+
+  if (!session?.user?.id) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  const body = await c.req.parseBody();
+  const image = body.image;
+
+  const validationError = validateImageFile(image);
+  if (validationError) {
+    return c.json({ error: validationError }, 400);
+  }
+
+  if (!(image instanceof File)) {
+    return c.json({ error: "No file provided" }, 400);
+  }
+
+  try {
+    const result = await uploadImageToCloudinary(image);
+
+    return c.json({
+      url: result.secure_url,
+      publicId: result.public_id,
+    });
+  } catch (error) {
+    console.error("Cloudinary upload failed", error);
+    return c.json({ error: "Upload failed" }, 500);
+  }
 });
 
-export const rpcHandler:any = new RPCHandler(appRouter, {
-	interceptors: [
-		onError((error:any) => {
-			console.error(error);
-		}),
-	],
+export const apiHandler: any = new OpenAPIHandler(appRouter, {
+  plugins: [
+    new OpenAPIReferencePlugin({
+      schemaConverters: [new ZodToJsonSchemaConverter()],
+    }),
+  ],
+  interceptors: [
+    onError((error: any) => {
+      console.error(error);
+    }),
+  ],
+});
+
+export const rpcHandler: any = new RPCHandler(appRouter, {
+  interceptors: [
+    onError((error: any) => {
+      console.error(error);
+    }),
+  ],
 });
 
 app.use("/*", async (c, next) => {
-	const context = await createContext({ context: c });
+  const context = await createContext({ context: c });
 
-	const rpcResult = await rpcHandler.handle(c.req.raw, {
-		prefix: "/rpc",
-		context: context,
-	});
+  const rpcResult = await rpcHandler.handle(c.req.raw, {
+    prefix: "/rpc",
+    context: context,
+  });
 
-	if (rpcResult.matched) {
-		return c.newResponse(null //rpcResult.response.body
-		, rpcResult.response);
-	}
+  if (rpcResult.matched) {
+    return c.newResponse(rpcResult.response.body, rpcResult.response);
+  }
 
-	const apiResult = await apiHandler.handle(c.req.raw, {
-		prefix: "/api-reference",
-		context: context,
-	});
+  const apiResult = await apiHandler.handle(c.req.raw, {
+    prefix: "/api-reference",
+    context: context,
+  });
 
-	if (apiResult.matched) {
-		return c.newResponse(null //apiResult.response.body 
-		, apiResult.response);
-	}
+  if (apiResult.matched) {
+    return c.newResponse(apiResult.response.body, apiResult.response);
+  }
 
-	await next();
+  await next();
 });
 
 app.get("/", (c) => {
-	return c.text("OK");
+  return c.text("OK");
 });
 
 import { serve } from "@hono/node-server";
 
 serve(
-	{
-		fetch: app.fetch,
-		port: parseInt(process.env.PORT || '3000', 10),
-	},
-	(info) => {
-		console.log(`Server is running on http://localhost:${info.port}`);
-	},
+  {
+    fetch: app.fetch,
+    port: 3000,
+  },
+  (info) => {
+    console.log(`Server is running on http://localhost:${info.port}`);
+  },
 );
 
 const handler = handle(app);

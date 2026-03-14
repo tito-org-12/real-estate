@@ -1,0 +1,22 @@
+services:
+  app:
+    build: .
+    ports:
+      - '8080:8080'
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - NEON_API_KEY=${NEON_API_KEY}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+    profiles: ["dev", "prod"]
+
+  db:
+    image: neondatabase/neon_local:latest
+    ports:
+      - '5432:5432' # Local Postgres port
+    environment:
+      NEON_API_KEY: ${NEON_API_KEY}
+      NEON_PROJECT_ID: ${NEON_PROJECT_ID}
+      DRIVER: serverless
+    profiles: ["dev"] # Only runs when you are developing!

@@ -7,15 +7,15 @@ import Header from "@/components/header";
 import Providers from "@/components/providers";
 
 const fontSerif = Cormorant_Garamond({
-	variable: "--font-serif",
-	subsets: ["latin"],
-	weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 const fontSans = Plus_Jakarta_Sans({
-	variable: "--font-sans",
-	subsets: ["latin"],
-	weight: ["400", "500", "600", "700"],
+  variable: "--font-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -24,22 +24,22 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-	children,
+  children,
 }: Readonly<{
-	children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-	return (
-		<html lang="en" suppressHydrationWarning>
-			<body
-				className={`${fontSans.variable} ${fontSerif.variable} font-sans antialiased`}
-			>
-				<Providers>
-					<div className="grid h-svh grid-rows-[auto_1fr]">
-						<Header />
-						{children}
-					</div>
-				</Providers>
-			</body>
-		</html>
-	);
+  return (
+    <html lang='en' suppressHydrationWarning>
+      <body
+        className={`${fontSans.variable} ${fontSerif.variable} font-sans antialiased`}
+      >
+        <Providers>
+          <div className='grid h-svh grid-rows-[auto_1fr]'>
+            <Header />
+            {children}
+          </div>
+        </Providers>
+      </body>
+    </html>
+  );
 }

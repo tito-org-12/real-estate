@@ -12,7 +12,7 @@
 
 Nestora is a two-sided rental marketplace focused on helping renters discover trusted homes quickly and helping landlords fill vacancies with qualified inquiries. The current product foundation already includes authentication, listing creation, listing browse/detail experiences, and a landlord dashboard baseline.
 
-This refined PRD sharpens the strategy around a **single vertical: house renting**. It defines a practical MVP, measurable outcomes, risk controls, and a phased delivery plan to reach product-market fit and monetize responsibly.
+This refined PRD sharpens the strategy around a **single vertical: house renting**. It defines a practical MVP, measurable outcomes, risk controls, and a phased delivery plan to reach product-market fit with a free-access launch model.
 
 ## Project Overview
 
@@ -34,7 +34,7 @@ Rental discovery is often fragmented, outdated, and low-trust. Renters waste tim
 
 - Achieve early market liquidity in pilot locations.
 - Build a repeatable landlord acquisition and activation motion.
-- Establish a monetization path without harming listing supply growth.
+- Keep launch access simple so all core marketplace features are available without payment gates.
 
 ### User Goals
 
@@ -56,7 +56,6 @@ Rental discovery is often fragmented, outdated, and low-trust. Renters waste tim
 - Median time to first inquiry after publish: **<72 hours**
 - Landlord D30 retention: **≥35%**
 - Renter D30 retention: **≥20%**
-- Paid conversion (if subscription rollout is enabled): **5–10% within 6 months**
 
 ## Target Users
 
@@ -178,9 +177,9 @@ Rental discovery is often fragmented, outdated, and low-trust. Renters waste tim
 - Landlord can view and manage listing inventory.
 - Dashboard exposes account and listing status.
 
-### FR-7 Subscription Readiness
+### FR-7 Free Access Policy
 
-- Paid plans can gate premium visibility and advanced tools.
+- All core marketplace features are available without access gating during launch phases.
 
 ## Non-Functional Requirements
 
@@ -213,18 +212,11 @@ Rental discovery is often fragmented, outdated, and low-trust. Renters waste tim
 - Fast loading states for all listing-heavy views.
 - Accessible forms, controls, and keyboard navigation.
 
-## Monetization Strategy
+## Access Model
 
-### Primary Revenue
-
-- Landlord subscription plans:
-  - **Free:** baseline listing limits and standard distribution.
-  - **Pro:** higher limits, priority placement, and advanced analytics.
-
-### Secondary Revenue (Phase 2+)
-
-- Featured listing boosts.
-- Partner referral commissions (screening, insurance, moving services).
+- Launch policy: all core marketplace capabilities are free to use.
+- Scope includes listing create/list/get, inquiry submission, dashboard basics, and search/filter access.
+- Commercial packaging is intentionally deferred until after launch stability and liquidity goals are met.
 
 ## Timeline and Priority
 
@@ -245,10 +237,10 @@ Rental discovery is often fragmented, outdated, and low-trust. Renters waste tim
 - Add saved listings/searches and listing quality controls.
 - Introduce anti-spam and moderation baseline tools.
 
-### Phase 3 (Weeks 11–14) — Monetization Expansion
+### Phase 3 (Weeks 11–14) — Growth Enablers
 
-- Enable paid tiers and premium placements.
-- Add listing analytics for landlords.
+- Expand landlord analytics and operational insights.
+- Improve listing visibility and discoverability using quality and recency signals.
 
 ## Assumptions
 
@@ -263,7 +255,7 @@ Rental discovery is often fragmented, outdated, and low-trust. Renters waste tim
 - **Low trust from renters:** enforce quality thresholds and moderation.
 - **Slow landlord response:** add response SLA nudges and notifications.
 - **Scope drift:** enforce strict MVP boundary and phase gates.
-- **Early monetization friction:** delay aggressive paywalls until liquidity targets are met.
+- **Scope pressure from commercialization requests:** keep launch free-access and defer commercial packaging until post-launch review.
 
 ## MVP Scope
 
@@ -298,7 +290,13 @@ Rental discovery is often fragmented, outdated, and low-trust. Renters waste tim
 1. Which pilot city/currency should be locked for launch?
 2. Should inquiry require login in MVP, or allow guest submissions?
 3. What minimum listing-quality threshold blocks publishing?
-4. When should paid plans be enabled relative to liquidity milestones?
+4. Which visibility rules should be used to prioritize high-quality listings?
+
+### Phase 0 Resolution Snapshot (March 2026)
+
+- Pilot lock: Riyadh + SAR
+- Inquiry policy: guest submissions allowed
+- Event naming convention: `snake_case`
 
 ---
 
@@ -306,4 +304,4 @@ Rental discovery is often fragmented, outdated, and low-trust. Renters waste tim
 
 - Existing foundation already supports: authentication, listing create/list/get, and landlord dashboard shell.
 - Immediate gap closure needed: inquiry persistence, rental-specific taxonomy hardening, and KPI instrumentation.
-- Subscription capability should be feature-flagged and rolled out once liquidity KPIs are stable.
+- Free-access capability should remain the default through launch while product-market fit signals stabilize.
