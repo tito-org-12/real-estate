@@ -164,6 +164,19 @@ app.get("/", (c) => {
 });
 
 import { serve } from "@hono/node-server";
+import cron from "node-cron";
+
+// Keep-alive cron job to prevent Render sleep
+const keepAliveJob = cron.schedule("*/5 * * * *", () => {
+  console.log(`[Keep-Alive] Service is active - ${new Date().toISOString()}`);
+});
+
+// Graceful shutdown
+process.on("SIGINT", () => {
+  keepAliveJob.stop();
+  console.log("Keep-alive cron job stopped");
+  process.exit(0);
+});
 
 serve(
   {
@@ -172,6 +185,7 @@ serve(
   },
   (info) => {
     console.log(`Server is running on http://localhost:${info.port}`);
+    console.log(`Keep-alive job started - runs every minute`);
   },
 );
 

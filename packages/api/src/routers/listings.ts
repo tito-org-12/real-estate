@@ -59,8 +59,8 @@ export const listingRouter = {
         sortBy: z
           .enum(["recency", "price_asc", "price_desc"])
           .default("recency"),
-        limit: z.number().default(20),
-        cursor: z.number().default(0), // Simple offset for now
+        limit: z.number().int().positive().default(20),
+        cursor: z.number().int().nonnegative().default(0), // Simple offset for now
       }),
     )
     .handler(async ({ context, input }) => {
@@ -155,7 +155,7 @@ export const listingRouter = {
     .input(
       z.object({
         status: z.enum(["draft", "published", "rented"]).optional(),
-        limit: z.number().default(50),
+        limit: z.number().int().positive().default(50),
       }),
     )
     .handler(async ({ context, input }) => {
@@ -249,7 +249,7 @@ export const listingRouter = {
   advertisersDirectory: publicProcedure
     .input(
       z.object({
-        limit: z.number().default(100),
+        limit: z.number().int().positive().default(100),
       }),
     )
     .handler(async ({ context, input }) => {

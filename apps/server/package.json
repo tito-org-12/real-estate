@@ -26,6 +26,7 @@
     "dotenv": "catalog:",
     "drizzle-orm": "^0.45.1",
     "hono": "catalog:",
+    "node-cron": "^4.2.1",
     "zod": "catalog:"
   },
   "devDependencies": {

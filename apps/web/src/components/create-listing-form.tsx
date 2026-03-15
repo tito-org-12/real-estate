@@ -3,12 +3,13 @@
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { trackPhase0Event } from "@/lib/analytics";
 import { getTransformedUrl } from "@/lib/cloudinary";
 import { createPropertyImageDataAccess } from "@/lib/storage/property-image-data-access";
 import { PILOT_CITY, PILOT_CURRENCY_CODE } from "@/lib/utils";
+import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,6 +28,7 @@ const propertyImageDataAccess = createPropertyImageDataAccess();
 
 export function CreateListingForm() {
   const router = useRouter();
+  const { data: session } = authClient.useSession();
   const [listingType, setListingType] = useState<ListingType>("apartment");
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -45,6 +47,14 @@ export function CreateListingForm() {
     phone: "",
     whatsapp: "",
   });
+
+  // Auto-fill whatsapp from session when session loads
+  useEffect(() => {
+    const whatsapp = (session?.user as any)?.whatsapp;
+    if (whatsapp && !formData.whatsapp) {
+      setFormData((prev) => ({ ...prev, whatsapp }));
+    }
+  }, [(session?.user as any)?.whatsapp]);
 
   const createMutation = useMutation(
     orpc.listings.create.mutationOptions({

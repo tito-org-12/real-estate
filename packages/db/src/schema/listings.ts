@@ -21,6 +21,16 @@ export const listingStatusEnum = pgEnum("listing_status", [
   "published",
   "rented",
 ]);
+export const inquiryChannelEnum = pgEnum("inquiry_channel", [
+  "form",
+  "whatsapp",
+  "call",
+]);
+export const inquiryStatusEnum = pgEnum("inquiry_status", [
+  "new",
+  "responded",
+  "archived",
+]);
 
 export const listings = pgTable("listings", {
   id: text("id")
@@ -54,14 +64,19 @@ export const inquiries = pgTable(
       .notNull()
       .references(() => listings.id, { onDelete: "cascade" }),
     userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
-    name: text("name").notNull(),
-    email: text("email").notNull(),
-    message: text("message").notNull(),
+    name: text("name"),
+    email: text("email"),
+    phone: text("phone"),
+    message: text("message"),
+    channel: inquiryChannelEnum("channel").notNull().default("form"),
+    status: inquiryStatusEnum("status").notNull().default("new"),
+    respondedAt: timestamp("responded_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [
     index("inquiries_listing_idx").on(table.listingId),
     index("inquiries_user_idx").on(table.userId),
+    index("inquiries_status_idx").on(table.status),
   ],
 );
 
