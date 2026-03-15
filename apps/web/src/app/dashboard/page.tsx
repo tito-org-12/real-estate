@@ -1,32 +1,36 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 import { authClient } from "@/lib/auth-client";
 
 import Dashboard from "./dashboard";
 
-export default async function DashboardPage() {
-  try {
-    console.log("[Dashboard] Page loading...");
+export default function DashboardPage() {
+  const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
 
-    const session = await authClient.getSession({
-      fetchOptions: {
-        headers: await headers(),
-        throw: true,
-      },
-    });
-
-    console.log("[Dashboard] Session retrieved:", session?.user?.id);
-
-    if (!session?.user) {
-      console.log("[Dashboard] No user in session, redirecting to login");
-      redirect("/login");
+  useEffect(() => {
+    if (!isPending && !session?.user) {
+      router.push("/login");
     }
+  }, [session, isPending, router]);
 
-    console.log("[Dashboard] Rendering with user:", session.user.id);
-    return <Dashboard session={session} />;
-  } catch (error) {
-    console.error("[Dashboard] Error:", error);
-    throw error;
+  if (isPending) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-muted border-t-primary" />
+          <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
   }
+
+  if (!session?.user) {
+    return null;
+  }
+
+  return <Dashboard session={session} />;
 }
