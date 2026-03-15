@@ -1,7 +1,8 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, MapPin, Phone, User } from "lucide-react";
+import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { trackPhase0Event } from "@/lib/analytics";
@@ -12,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { authClient } from "@/lib/auth-client";
 import { orpc } from "@/utils/orpc";
 
 export default function ListingDetailsPage({
@@ -20,11 +22,14 @@ export default function ListingDetailsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const { data: session } = authClient.useSession();
   const [inquiry, setInquiry] = useState({
     name: "",
     email: "",
+    phone: "",
     message: "",
   });
+  const [showSignUpPrompt, setShowSignUpPrompt] = useState(false);
 
   const listingQueryOptions = orpc.listings.get.queryOptions({
     input: { id },
@@ -48,8 +53,12 @@ export default function ListingDetailsPage({
         setInquiry({
           name: "",
           email: "",
+          phone: "",
           message: "",
         });
+        if (!session?.user) {
+          setShowSignUpPrompt(true);
+        }
       },
       onError: (error) => {
         trackPhase0Event("inquiry_submit_failed", {
@@ -57,6 +66,15 @@ export default function ListingDetailsPage({
           reason: error.message,
         });
         toast.error(error.message || "Unable to send inquiry.");
+      },
+    }),
+  );
+
+  // Separate mutation for click tracking (fire-and-forget for WhatsApp/Call)
+  const trackClickMutation = useMutation(
+    orpc.inquiries.create.mutationOptions({
+      onError: () => {
+        // Silent failure — click tracking should not interrupt user flow
       },
     }),
   );
@@ -94,7 +112,9 @@ export default function ListingDetailsPage({
       listingId: id,
       name: inquiry.name,
       email: inquiry.email,
+      phone: inquiry.phone || undefined,
       message: inquiry.message,
+      channel: "form",
     });
   };
 
@@ -104,16 +124,21 @@ export default function ListingDetailsPage({
   const publishedAt = new Date(listing.createdAt);
   const expiresAt = new Date(publishedAt);
   expiresAt.setDate(expiresAt.getDate() + 30);
-  const whatsappNumber = String(listing.meta?.whatsapp ?? "").replaceAll(
-    /\s+/g,
-    "",
+
+  // Helper to build WhatsApp deep link with proper phone number sanitization
+  const buildWhatsAppHref = (rawNumber: string, title: string, ref: string): string | null => {
+    const digits = rawNumber.replace(/\D/g, "");
+    if (!digits) return null;
+    const message = `Hello, I'm interested in ${title} (${ref})`;
+    return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+  };
+
+  const whatsappHref = buildWhatsAppHref(
+    String(listing.meta?.whatsapp ?? ""),
+    listing.title,
+    referenceNumber,
   );
   const contactPhone = String(listing.meta?.phone ?? "").replaceAll(/\s+/g, "");
-  const whatsappText = `Hello, I'm interested in ${listing.title} (${referenceNumber})`;
-  const normalizedWhatsappNumber = whatsappNumber.replace(/^\+/, "");
-  const whatsappHref = whatsappNumber
-    ? `https://wa.me/${normalizedWhatsappNumber}?text=${encodeURIComponent(whatsappText)}`
-    : null;
   const phoneHref = contactPhone ? `tel:${contactPhone}` : null;
   const mapHref = listing.location
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(listing.location)}`
@@ -268,6 +293,21 @@ export default function ListingDetailsPage({
                     />
                   </div>
                   <div className='space-y-2'>
+                    <Label htmlFor='inquiry-phone'>Phone (optional)</Label>
+                    <Input
+                      id='inquiry-phone'
+                      type='tel'
+                      value={inquiry.phone}
+                      onChange={(event) =>
+                        setInquiry((previous) => ({
+                          ...previous,
+                          phone: event.target.value,
+                        }))
+                      }
+                      placeholder='Your phone number'
+                    />
+                  </div>
+                  <div className='space-y-2'>
                     <Label htmlFor='inquiry-message'>Message</Label>
                     <Textarea
                       id='inquiry-message'
@@ -305,6 +345,11 @@ export default function ListingDetailsPage({
                           listingId: id,
                           referenceNumber,
                         });
+                        // Fire-and-forget lead record
+                        trackClickMutation.mutate({
+                          listingId: id,
+                          channel: "whatsapp",
+                        });
                         globalThis.open(
                           whatsappHref,
                           "_blank",
@@ -325,6 +370,11 @@ export default function ListingDetailsPage({
                           listingId: id,
                           referenceNumber,
                         });
+                        // Fire-and-forget lead record
+                        trackClickMutation.mutate({
+                          listingId: id,
+                          channel: "call",
+                        });
                         globalThis.location.href = phoneHref;
                       }}
                     >
@@ -338,6 +388,26 @@ export default function ListingDetailsPage({
                     </p>
                   )}
                 </form>
+
+                {showSignUpPrompt && (
+                  <div className='mt-4 rounded-xl border border-primary/20 bg-primary/5 p-4'>
+                    <p className='mb-3 text-sm font-medium'>
+                      Track your inquiry with a free account.
+                    </p>
+                    <div className='flex gap-2'>
+                      <Link href='/login'>
+                        <Button size='sm'>Create Account</Button>
+                      </Link>
+                      <Button
+                        size='sm'
+                        variant='ghost'
+                        onClick={() => setShowSignUpPrompt(false)}
+                      >
+                        No thanks
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
                 <div className='mt-8 flex items-center gap-4 border-border/40 border-t pt-6'>
                   <div className='flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10'>

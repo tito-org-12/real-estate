@@ -16,6 +16,15 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 	},
+	user: {
+		additionalFields: {
+			whatsapp: {
+				type: "string",
+				required: false,
+				input: true,
+			},
+		},
+	},
 	advanced: {
 		defaultCookieAttributes: {
 			sameSite: "none",

@@ -17,6 +17,7 @@ export const user = pgTable("user", {
   role: userRoleEnum("role").notNull().default("renter"),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
+  whatsapp: text("whatsapp"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()

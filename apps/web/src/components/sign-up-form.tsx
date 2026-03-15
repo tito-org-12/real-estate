@@ -35,6 +35,7 @@ export default function SignUpForm({
       password: "",
       name: "",
       role: "renter" as "renter" | "landlord",
+      whatsapp: "",
     },
     onSubmit: async ({ value }) => {
       trackPhase0Event("sign_up_started", {
@@ -46,7 +47,8 @@ export default function SignUpForm({
           email: value.email,
           password: value.password,
           name: value.name,
-        },
+          whatsapp: value.whatsapp || undefined,
+        } as any,
         {
           onSuccess: async () => {
             try {
@@ -75,6 +77,12 @@ export default function SignUpForm({
         email: z.email("Invalid email address"),
         password: z.string().min(8, "Password must be at least 8 characters"),
         role: z.enum(["renter", "landlord"]),
+        whatsapp: z
+          .string()
+          .refine(
+            (val) => !val || /^\+?[1-9]\d{6,14}$/.test(val),
+            "Enter a valid international number (e.g. +250780000000)"
+          ),
       }),
     },
   });
@@ -219,6 +227,39 @@ export default function SignUpForm({
                   id={field.name}
                   name={field.name}
                   type='password'
+                  className='h-11 border-muted bg-muted/30 transition-colors focus:border-primary/50'
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                />
+                {field.state.meta.errors.map((error) => (
+                  <p
+                    key={error?.message}
+                    className='mt-1 text-destructive text-xs'
+                  >
+                    {error?.message}
+                  </p>
+                ))}
+              </div>
+            )}
+          </form.Field>
+        </div>
+
+        <div>
+          <form.Field name='whatsapp'>
+            {(field) => (
+              <div className='space-y-2'>
+                <Label
+                  htmlFor={field.name}
+                  className='text-muted-foreground text-xs uppercase tracking-wider'
+                >
+                  WhatsApp Number (Optional)
+                </Label>
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  type='tel'
+                  placeholder='+250780000000'
                   className='h-11 border-muted bg-muted/30 transition-colors focus:border-primary/50'
                   value={field.state.value}
                   onBlur={field.handleBlur}

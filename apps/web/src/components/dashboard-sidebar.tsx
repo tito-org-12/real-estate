@@ -1,5 +1,5 @@
 "use client";
-import { LayoutDashboard, ListPlus, LogOut, User } from "lucide-react";
+import { LayoutDashboard, ListPlus, LogOut, User, Inbox, UserCog } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -17,12 +17,14 @@ const NAVIGATION_ITEMS = [
     items: [
       { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
       { href: "/listings", label: "Browse Rentals", icon: LayoutDashboard },
+      { href: "/dashboard/profile", label: "Profile", icon: UserCog },
     ],
   },
   {
     title: "Actions",
     items: [
       { href: "/listings/create", label: "Create Listing", icon: ListPlus },
+      { href: "/dashboard/inbox", label: "Inquiries", icon: Inbox },
     ],
   },
 ];
