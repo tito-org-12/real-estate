@@ -166,10 +166,29 @@ app.get("/", (c) => {
 import { serve } from "@hono/node-server";
 import cron from "node-cron";
 
-// Keep-alive cron job to prevent Render sleep
-const keepAliveJob = cron.schedule("*/5 * * * *", () => {
-  console.log(`[Keep-Alive] Service is active - ${new Date().toISOString()}`);
+// Health check endpoint - used to keep service alive
+app.get("/health", (c) => {
+  return c.json(
+    { status: "ok", timestamp: new Date().toISOString() },
+    200
+  );
 });
+
+// Keep-alive cron job to prevent Render sleep
+// Pings the health endpoint every 5 minutes to keep the service warm
+const keepAliveJob = cron.schedule("*/5 * * * *", async () => {
+  try {
+    const timestamp = new Date().toISOString();
+    console.log(`[Keep-Alive] Service ping at ${timestamp}`);
+
+    // Ping the health endpoint locally to keep the process responsive
+    await fetch("http://localhost:3000/health");
+  } catch (error) {
+    console.error("[Keep-Alive] Error:", error instanceof Error ? error.message : error);
+  }
+});
+  
+keepAliveJob.start();
 
 // Graceful shutdown
 process.on("SIGINT", () => {
