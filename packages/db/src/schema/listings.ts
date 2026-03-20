@@ -10,6 +10,23 @@ import {
 } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 
+export type ListingMeta = {
+  bedrooms?: number;
+  bathrooms?: number;
+  sqft?: number;
+  neighborhood?: string;
+  phone?: string;
+  whatsapp?: string;
+  imagePublicId?: string; // legacy — keep for backward compat
+  imagePublicIds?: string[]; // new multi-image
+  verificationStatus?: "pending" | "verified" | "needs_review";
+  publishedAt?: string;
+  expiresAt?: string;
+  revalidatedAt?: string;
+  propertyKind?: string;
+  [key: string]: any; // allow other dynamic fields
+};
+
 export const listingTypeEnum = pgEnum("listing_type", [
   "apartment",
   "house",
@@ -45,7 +62,7 @@ export const listings = pgTable("listings", {
   type: listingTypeEnum("type").notNull(),
   description: text("description"),
   location: text("location"),
-  meta: jsonb("meta").$type<Record<string, any>>().notNull(), // dynamic attributes
+  meta: jsonb("meta").$type<ListingMeta>().notNull(), // dynamic attributes
   images: text("images").array().notNull().default([]),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")

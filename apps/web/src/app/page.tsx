@@ -237,7 +237,7 @@ export default function Home() {
           </h3>
           <p className='mx-auto mt-4 max-w-2xl text-muted-foreground text-lg leading-relaxed'>
             From urban apartments in Kigali to homes in Rwanda's growing cities,
-            Nestora helps you compare opportunities with local context and
+            Kigali Home helps you compare opportunities with local context and
             confidence.
           </p>
         </div>
@@ -410,7 +410,7 @@ export default function Home() {
 
           <div className='mt-10 flex flex-wrap items-center justify-between gap-4 border-white/15 border-t pt-6'>
             <p className='text-sm text-white/70'>
-              © 2026 Nestora. All rights reserved.
+              © 2026 Kigali Home. All rights reserved.
             </p>
             <div className='flex items-center gap-2'>
               <Button

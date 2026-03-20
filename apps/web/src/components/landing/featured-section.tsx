@@ -112,7 +112,7 @@ export function FeaturedSection() {
               Find a neighborhood, <br /> not just a listing.
             </h3>
             <p className='text-lg text-muted-foreground leading-relaxed'>
-              Nestora helps renters compare homes with confidence and helps
+              Kigali Home helps renters compare homes with confidence and helps
               landlords receive qualified inquiries faster.
             </p>
             <button className='self-start border-primary border-b pb-1 font-semibold text-primary text-xs uppercase tracking-widest transition-opacity hover:opacity-70'>
