@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { Route } from "next";
 import Link from "next/link";
 import { use } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Instagram, Linkedin, Twitter } from "lucide-react";
 import { ListingCard } from "@/components/listing-card";
 import { orpc } from "@/utils/orpc";
 
@@ -63,6 +63,45 @@ export default function AdvertiserProfilePage({
             <p className='font-medium text-xl'>{data.trust.staleListings}</p>
           </div>
         </div>
+
+        {/* Social links row */}
+        {((data.advertiser as any).instagram || (data.advertiser as any).linkedin || (data.advertiser as any).twitter) && (
+          <div className='mt-4 flex items-center gap-3'>
+            {(data.advertiser as any).instagram && (
+              <a
+                href={(data.advertiser as any).instagram}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='flex h-9 w-9 items-center justify-center rounded-full border border-border/40 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary'
+                aria-label='Instagram'
+              >
+                <Instagram className='h-4 w-4' />
+              </a>
+            )}
+            {(data.advertiser as any).linkedin && (
+              <a
+                href={(data.advertiser as any).linkedin}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='flex h-9 w-9 items-center justify-center rounded-full border border-border/40 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary'
+                aria-label='LinkedIn'
+              >
+                <Linkedin className='h-4 w-4' />
+              </a>
+            )}
+            {(data.advertiser as any).twitter && (
+              <a
+                href={(data.advertiser as any).twitter}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='flex h-9 w-9 items-center justify-center rounded-full border border-border/40 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary'
+                aria-label='Twitter / X'
+              >
+                <Twitter className='h-4 w-4' />
+              </a>
+            )}
+          </div>
+        )}
       </div>
 
       <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
@@ -76,6 +115,7 @@ export default function AdvertiserProfilePage({
             location={listing.location}
             images={listing.images}
             meta={listing.meta}
+            status={listing.status}
           />
         ))}
       </div>

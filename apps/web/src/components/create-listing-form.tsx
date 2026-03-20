@@ -56,6 +56,7 @@ export function CreateListingForm() {
     neighborhood: "",
     phone: "",
     whatsapp: "",
+    furnishingStatus: "" as "" | "furnished" | "unfurnished",
   });
 
   // Auto-fill whatsapp from session when session loads
@@ -218,6 +219,7 @@ export function CreateListingForm() {
       neighborhood: formData.neighborhood,
       ...(phone ? { phone } : {}),
       ...(whatsapp ? { whatsapp } : {}),
+      ...(formData.furnishingStatus ? { furnishingStatus: formData.furnishingStatus } : {}),
       ...(imagePublicIds.length > 0 ? { imagePublicIds } : {}),
     };
 
@@ -550,6 +552,35 @@ export function CreateListingForm() {
                     onChange={handleChange}
                     className='h-10 border-border/60 bg-muted/20 focus:border-primary/50'
                   />
+                </div>
+                <div className='space-y-3'>
+                  <Label className='text-muted-foreground text-xs uppercase tracking-wider'>
+                    Furnishing Status (optional)
+                  </Label>
+                  <div className='flex gap-3'>
+                    <label className='flex cursor-pointer items-center gap-2'>
+                      <input
+                        type='radio'
+                        name='furnishingStatus'
+                        value='furnished'
+                        checked={formData.furnishingStatus === 'furnished'}
+                        onChange={handleChange}
+                        className='h-4 w-4 cursor-pointer'
+                      />
+                      <span className='text-sm'>Furnished</span>
+                    </label>
+                    <label className='flex cursor-pointer items-center gap-2'>
+                      <input
+                        type='radio'
+                        name='furnishingStatus'
+                        value='unfurnished'
+                        checked={formData.furnishingStatus === 'unfurnished'}
+                        onChange={handleChange}
+                        className='h-4 w-4 cursor-pointer'
+                      />
+                      <span className='text-sm'>Unfurnished</span>
+                    </label>
+                  </div>
                 </div>
                 <div className='space-y-2'>
                   <Label

@@ -97,7 +97,7 @@ export default function Dashboard({
     );
   };
 
-  const runBulkStatusUpdate = (status: "draft" | "published" | "rented") => {
+  const runBulkStatusUpdate = (status: "draft" | "published" | "rented" | "sold") => {
     if (!selectedListingIds.length) {
       toast.info("Select at least one listing first.");
       return;
@@ -197,6 +197,14 @@ export default function Dashboard({
                         disabled={bulkStatusMutation.isPending}
                       >
                         Mark Rented
+                      </Button>
+                      <Button
+                        variant='destructive'
+                        size='sm'
+                        onClick={() => runBulkStatusUpdate("sold")}
+                        disabled={bulkStatusMutation.isPending}
+                      >
+                        Mark as Sold
                       </Button>
                     </div>
                   </div>

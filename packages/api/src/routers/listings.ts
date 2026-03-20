@@ -65,7 +65,7 @@ export const listingRouter = {
     )
     .handler(async ({ context, input }) => {
       const filters = [];
-      filters.push(eq(listings.status, "published"));
+      filters.push(inArray(listings.status, ["published", "rented", "sold"]));
 
       if (input.type) {
         filters.push(eq(listings.type, input.type));
@@ -143,7 +143,10 @@ export const listingRouter = {
     .input(z.object({ id: z.string() }))
     .handler(async ({ context, input }) => {
       const item = await context.db.query.listings.findFirst({
-        where: and(eq(listings.id, input.id), eq(listings.status, "published")),
+        where: and(
+          eq(listings.id, input.id),
+          inArray(listings.status, ["published", "rented", "sold"]),
+        ),
         with: {
           owner: true,
         },
@@ -154,7 +157,7 @@ export const listingRouter = {
   mine: protectedProcedure
     .input(
       z.object({
-        status: z.enum(["draft", "published", "rented"]).optional(),
+        status: z.enum(["draft", "published", "rented", "sold"]).optional(),
         limit: z.number().int().positive().default(50),
       }),
     )
@@ -177,7 +180,7 @@ export const listingRouter = {
     .input(
       z.object({
         listingIds: z.array(z.string()).min(1).max(50),
-        status: z.enum(["draft", "published", "rented"]),
+        status: z.enum(["draft", "published", "rented", "sold"]),
       }),
     )
     .handler(async ({ context, input }) => {
@@ -328,6 +331,9 @@ export const listingRouter = {
               id: true,
               name: true,
               image: true,
+              instagram: true,
+              linkedin: true,
+              twitter: true,
             },
           },
         },
