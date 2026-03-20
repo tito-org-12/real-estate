@@ -23,6 +23,21 @@ export const auth = betterAuth({
 				required: false,
 				input: true,
 			},
+			instagram: {
+				type: "string",
+				required: false,
+				input: true,
+			},
+			linkedin: {
+				type: "string",
+				required: false,
+				input: true,
+			},
+			twitter: {
+				type: "string",
+				required: false,
+				input: true,
+			},
 		},
 	},
 	advanced: {

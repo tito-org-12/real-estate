@@ -254,6 +254,7 @@ function ListingsContent() {
                   location={listing.location}
                   images={listing.images}
                   meta={listing.meta}
+                  status={listing.status}
                 />
               ))}
             </div>

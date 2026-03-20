@@ -18,6 +18,9 @@ export const user = pgTable("user", {
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
   whatsapp: text("whatsapp"),
+  instagram: text("instagram"),
+  linkedin: text("linkedin"),
+  twitter: text("twitter"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()

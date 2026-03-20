@@ -1,4 +1,4 @@
-import { Bath, BedDouble, Home, MapPin } from "lucide-react";
+import { Bath, BedDouble, Home, MapPin, Sofa } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 
@@ -10,6 +10,25 @@ interface ListingCardProps {
   location?: string | null;
   images: string[];
   meta: Record<string, any>;
+  status?: string;
+}
+
+function getFurnishingLabel(value: unknown): string {
+  if (typeof value !== "string") {
+    return "Unfurnished";
+  }
+
+  const normalized = value.toLowerCase();
+
+  if (normalized === "furnished") {
+    return "Furnished";
+  }
+
+  if (normalized === "semi_furnished" || normalized === "semi-furnished") {
+    return "Semi furnished";
+  }
+
+  return "Unfurnished";
 }
 
 export function ListingCard({
@@ -20,8 +39,12 @@ export function ListingCard({
   location,
   images,
   meta,
+  status,
 }: ListingCardProps) {
   const coverImage = images[0] || "https://placehold.co/600x400?text=No+Image";
+  const hasStatusBadge = status === "sold" || status === "rented";
+  const statusLabel = status === "sold" ? "Sold" : "Taken";
+  const furnishingLabel = getFurnishingLabel(meta?.furnishingStatus);
 
   return (
     <Link href={`/listings/${id}`} className='group block h-full'>
@@ -35,9 +58,26 @@ export function ListingCard({
           />
           <div className='absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-30 transition-opacity group-hover:opacity-20' />
 
+          {hasStatusBadge && (
+            <div className='absolute top-3 right-3'>
+              <span className='inline-flex items-center gap-1.5 rounded-full bg-foreground/85 px-3 py-1.5 font-medium text-[11px] text-white uppercase tracking-wide shadow-sm backdrop-blur-sm'>
+                <span
+                  className='h-1.5 w-1.5 rounded-full bg-red-400'
+                  aria-hidden='true'
+                />
+                {statusLabel}
+              </span>
+            </div>
+          )}
+
           <div className='absolute inset-x-3 top-3 flex items-start justify-between'>
-            <div className='rounded-sm bg-background/90 px-2.5 py-1 font-semibold text-[10px] text-foreground uppercase tracking-widest shadow-sm backdrop-blur-sm'>
-              {type}
+            <div className='flex items-center gap-2'>
+              <div className='rounded-sm bg-background/90 px-2.5 py-1 font-semibold text-[10px] text-foreground uppercase tracking-widest shadow-sm backdrop-blur-sm'>
+                {type}
+              </div>
+              <div className='rounded-sm bg-emerald-600/90 px-2.5 py-1 font-medium text-[10px] text-white uppercase tracking-wide shadow-sm backdrop-blur-sm'>
+                {furnishingLabel}
+              </div>
             </div>
           </div>
         </div>
@@ -87,6 +127,12 @@ export function ListingCard({
               <div className='col-span-2 flex items-center'>
                 <MapPin className='mr-1.5 h-3.5 w-3.5 opacity-70' />
                 <span>{meta.neighborhood}</span>
+              </div>
+            )}
+            {meta.furnishingStatus && (
+              <div className='col-span-2 flex items-center'>
+                <Sofa className='mr-1.5 h-3.5 w-3.5 opacity-70' />
+                <span className='capitalize'>{meta.furnishingStatus}</span>
               </div>
             )}
           </div>

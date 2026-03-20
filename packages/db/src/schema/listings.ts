@@ -24,6 +24,7 @@ export type ListingMeta = {
   expiresAt?: string;
   revalidatedAt?: string;
   propertyKind?: string;
+  furnishingStatus?: "furnished" | "unfurnished";
   [key: string]: any; // allow other dynamic fields
 };
 
@@ -37,6 +38,7 @@ export const listingStatusEnum = pgEnum("listing_status", [
   "draft",
   "published",
   "rented",
+  "sold",
 ]);
 export const inquiryChannelEnum = pgEnum("inquiry_channel", [
   "form",

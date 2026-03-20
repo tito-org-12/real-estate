@@ -16,6 +16,9 @@ interface ProfileDashboardProps {
       name: string;
       email: string;
       whatsapp?: string | null;
+      instagram?: string | null;
+      linkedin?: string | null;
+      twitter?: string | null;
     } & Record<string, any>;
   };
 }
@@ -34,6 +37,9 @@ export default function ProfileDashboard({ session }: ProfileDashboardProps) {
   const [formData, setFormData] = useState({
     name: session.user.name,
     whatsapp: (session.user as any).whatsapp ?? "",
+    instagram: (session.user as any).instagram ?? "",
+    linkedin: (session.user as any).linkedin ?? "",
+    twitter: (session.user as any).twitter ?? "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,6 +63,9 @@ export default function ProfileDashboard({ session }: ProfileDashboardProps) {
       await authClient.updateUser({
         name: formData.name,
         whatsapp: formData.whatsapp || undefined,
+        instagram: formData.instagram || undefined,
+        linkedin: formData.linkedin || undefined,
+        twitter: formData.twitter || undefined,
       } as any);
 
       toast.success("Profile updated successfully!");
@@ -133,6 +142,54 @@ export default function ProfileDashboard({ session }: ProfileDashboardProps) {
                   <p className="mt-2 text-xs text-muted-foreground">
                     Used for automatic fill-in on property listings
                   </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-border/40 bg-card p-6">
+              <h2 className="mb-4 font-medium text-sm">Social Profiles (Optional)</h2>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="instagram" className="text-sm font-medium">
+                    Instagram URL
+                  </Label>
+                  <Input
+                    id="instagram"
+                    name="instagram"
+                    type="url"
+                    placeholder="https://instagram.com/yourhandle"
+                    value={formData.instagram}
+                    onChange={handleChange}
+                    className="mt-2 h-11"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="linkedin" className="text-sm font-medium">
+                    LinkedIn URL
+                  </Label>
+                  <Input
+                    id="linkedin"
+                    name="linkedin"
+                    type="url"
+                    placeholder="https://linkedin.com/in/yourname"
+                    value={formData.linkedin}
+                    onChange={handleChange}
+                    className="mt-2 h-11"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="twitter" className="text-sm font-medium">
+                    Twitter / X URL
+                  </Label>
+                  <Input
+                    id="twitter"
+                    name="twitter"
+                    type="url"
+                    placeholder="https://x.com/yourhandle"
+                    value={formData.twitter}
+                    onChange={handleChange}
+                    className="mt-2 h-11"
+                  />
                 </div>
               </div>
             </div>
