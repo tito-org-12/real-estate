@@ -190,12 +190,7 @@ const keepAliveJob = cron.schedule("*/5 * * * *", async () => {
   
 keepAliveJob.start();
 
-// Graceful shutdown
-process.on("SIGINT", () => {
-  keepAliveJob.stop();
-  console.log("Keep-alive cron job stopped");
-  process.exit(0);
-});
+
 
 serve(
   {

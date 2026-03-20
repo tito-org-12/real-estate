@@ -34,7 +34,7 @@ export default function Header() {
         {/* Logo Area */}
         <Link href='/' className='mr-6 flex items-center space-x-2'>
           <span className='font-bold font-serif text-2xl text-foreground tracking-tight'>
-            NESTORA
+            KIGALI HOME
           </span>
         </Link>
 

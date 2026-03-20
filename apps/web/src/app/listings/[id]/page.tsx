@@ -1,9 +1,9 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, MapPin, Phone, User } from "lucide-react";
+import { CheckCircle2, ChevronLeft, ChevronRight, MapPin, Phone, User, X } from "lucide-react";
 import Link from "next/link";
-import { use, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { trackPhase0Event } from "@/lib/analytics";
 import { formatCurrency } from "@/lib/utils";
@@ -15,6 +15,134 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { authClient } from "@/lib/auth-client";
 import { orpc } from "@/utils/orpc";
+
+function ImageCarousel({
+  images,
+  title,
+  type,
+}: {
+  images: string[];
+  title: string;
+  type?: string;
+}) {
+  const [current, setCurrent] = useState(0);
+  const total = images.length;
+
+  const goTo = useCallback((i: number) => {
+    setCurrent((current) => (i + total) % total);
+  }, [total]);
+
+  // Keyboard nav
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") goTo(current - 1);
+      if (e.key === "ArrowRight") goTo(current + 1);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [current, total, goTo]);
+
+  return (
+    <>
+      {/* Main slide container */}
+      <div className="group relative mb-4 aspect-video w-full overflow-hidden rounded-xl bg-muted shadow-md md:h-[60vh] md:max-h-[600px]">
+        {/* Sliding track */}
+        <div
+          className="flex h-full transition-transform duration-500 ease-in-out"
+          style={{ transform: `translateX(-${current * 100}%)` }}
+        >
+          {images.map((src, i) => (
+            <div key={i} className="relative h-full w-full shrink-0">
+              <img
+                src={src}
+                alt={`${title} — photo ${i + 1}`}
+                className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                loading={i === 0 ? "eager" : "lazy"}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Gradient overlay */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
+
+        {/* Prev / Next arrows */}
+        {total > 1 && (
+          <>
+            <button
+              onClick={() => goTo(current - 1)}
+              aria-label="Previous photo"
+              className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white backdrop-blur-sm hover:bg-black/60 transition-colors"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => goTo(current + 1)}
+              aria-label="Next photo"
+              className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white backdrop-blur-sm hover:bg-black/60 transition-colors"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </>
+        )}
+
+        {/* Counter badge */}
+        {total > 1 && (
+          <div className="absolute right-4 top-4 rounded-full bg-black/50 px-3 py-1 text-white text-xs backdrop-blur-sm">
+            {current + 1} / {total}
+          </div>
+        )}
+
+        {/* Type badge — same position as before */}
+        {type && (
+          <Badge className="absolute bottom-6 left-6 rounded-md border-0 bg-white/95 px-4 py-1.5 font-medium text-black text-xs uppercase tracking-wide shadow-lg backdrop-blur-md">
+            {type}
+          </Badge>
+        )}
+
+        {/* Dot indicators */}
+        {total > 1 && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i)}
+                aria-label={`Photo ${i + 1}`}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === current ? "w-5 bg-white" : "w-1.5 bg-white/50 hover:bg-white/75"
+                }`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Thumbnail strip */}
+      {total > 1 && (
+        <div className="mb-12 flex gap-2 overflow-x-auto pb-1">
+          {images.map((src, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              className={`h-16 w-24 shrink-0 overflow-hidden rounded-md border-2 transition-all ${
+                i === current
+                  ? "border-primary opacity-100"
+                  : "border-transparent opacity-60 hover:opacity-90"
+              }`}
+            >
+              <img
+                src={src}
+                alt={`Thumbnail ${i + 1}`}
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+            </button>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
 
 export default function ListingDetailsPage({
   params,
@@ -118,8 +246,6 @@ export default function ListingDetailsPage({
     });
   };
 
-  const coverImage =
-    listing.images[0] || "https://placehold.co/1200x800?text=No+Image";
   const referenceNumber = `NST-${listing.id.slice(0, 8).toUpperCase()}`;
   const publishedAt = new Date(listing.createdAt);
   const expiresAt = new Date(publishedAt);
@@ -151,6 +277,7 @@ export default function ListingDetailsPage({
   }
   const hiddenMetaKeys = new Set([
     "imagePublicId",
+    "imagePublicIds",
     "publicId",
     "image_public_id",
     "cloudinaryPublicId",
@@ -164,16 +291,30 @@ export default function ListingDetailsPage({
   return (
     <div className='min-h-screen bg-background pb-20'>
       <div className='container mx-auto max-w-[1400px] px-4 py-8 md:px-6 md:py-12'>
-        <div className='group relative mb-12 aspect-video w-full overflow-hidden rounded-xl bg-muted shadow-md md:h-[60vh] md:max-h-[600px]'>
-          <img
-            src={coverImage}
-            alt={listing.title}
-            className='h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105'
-          />
-          <div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60' />
-          <Badge className='absolute bottom-6 left-6 rounded-md border-0 bg-white/95 px-4 py-1.5 font-medium text-black text-xs uppercase tracking-wide shadow-lg backdrop-blur-md'>
-            {listing.type}
-          </Badge>
+        {/* Gallery carousel or static hero */}
+        <div className='mb-12'>
+          {listing.images.length > 1 ? (
+            <ImageCarousel
+              images={listing.images}
+              title={listing.title}
+              type={listing.type}
+            />
+          ) : (
+            <div className='group relative aspect-video w-full overflow-hidden rounded-xl bg-muted shadow-md md:h-[60vh] md:max-h-[600px]'>
+              <img
+                src={
+                  listing.images[0] ||
+                  "https://placehold.co/1200x800?text=No+Image"
+                }
+                alt={listing.title}
+                className='h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105'
+              />
+              <div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60' />
+              <Badge className='absolute bottom-6 left-6 rounded-md border-0 bg-white/95 px-4 py-1.5 font-medium text-black text-xs uppercase tracking-wide shadow-lg backdrop-blur-md'>
+                {listing.type}
+              </Badge>
+            </div>
+          )}
         </div>
 
         <div className='grid grid-cols-1 gap-12 lg:grid-cols-12'>

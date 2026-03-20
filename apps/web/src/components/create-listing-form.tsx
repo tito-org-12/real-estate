@@ -1,12 +1,11 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { trackPhase0Event } from "@/lib/analytics";
-import { getTransformedUrl } from "@/lib/cloudinary";
 import { createPropertyImageDataAccess } from "@/lib/storage/property-image-data-access";
 import { PILOT_CITY, PILOT_CURRENCY_CODE } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
@@ -21,25 +20,36 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import { orpc } from "@/utils/orpc";
 
 type ListingType = "apartment" | "house" | "villa" | "studio";
+
+type UploadItem = {
+  id: string;
+  file: File;
+  previewUrl: string;
+  status: "uploading" | "done" | "error";
+  url: string;
+  publicId: string;
+  error?: string;
+};
+
 const propertyImageDataAccess = createPropertyImageDataAccess();
+const MAX_PHOTOS = 10;
 
 export function CreateListingForm() {
   const router = useRouter();
   const { data: session } = authClient.useSession();
   const [listingType, setListingType] = useState<ListingType>("apartment");
   const [loading, setLoading] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [imagePublicId, setImagePublicId] = useState<string>("");
+  const [uploads, setUploads] = useState<UploadItem[]>([]);
 
   const [formData, setFormData] = useState({
     title: "",
     price: "",
     description: "",
     location: "",
-    imageUrl: "",
     bedrooms: "",
     bathrooms: "",
     sqft: "",
@@ -55,6 +65,13 @@ export function CreateListingForm() {
       setFormData((prev) => ({ ...prev, whatsapp }));
     }
   }, [(session?.user as any)?.whatsapp]);
+
+  // Cleanup preview URLs on unmount
+  useEffect(() => {
+    return () => {
+      uploads.forEach((u) => URL.revokeObjectURL(u.previewUrl));
+    };
+  }, [uploads]);
 
   const createMutation = useMutation(
     orpc.listings.create.mutationOptions({
@@ -83,37 +100,77 @@ export function CreateListingForm() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleImageUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
+  const handleFiles = (files: FileList | File[]) => {
+    const newFiles = Array.from(files);
+    const available = MAX_PHOTOS - uploads.length;
+    const toAdd = newFiles.slice(0, available);
 
-    if (!file) {
-      return;
+    if (newFiles.length > available) {
+      toast.warning(`Only ${available} more photo(s) allowed.`);
     }
 
-    setUploadingImage(true);
+    const items: UploadItem[] = toAdd.map((file) => ({
+      id: crypto.randomUUID(),
+      file,
+      previewUrl: URL.createObjectURL(file),
+      status: "uploading" as const,
+      url: "",
+      publicId: "",
+    }));
 
-    try {
-      const uploaded = await propertyImageDataAccess.uploadPropertyImage(file);
-      setFormData((previous) => ({ ...previous, imageUrl: uploaded.url }));
-      setImagePublicId(uploaded.publicId);
-      toast.success("Image uploaded successfully.");
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Image upload failed";
-      toast.error(message);
-    } finally {
-      setUploadingImage(false);
-      event.target.value = "";
-    }
+    setUploads((prev) => [...prev, ...items]);
+
+    // Upload each file in parallel
+    items.forEach((item) => {
+      propertyImageDataAccess
+        .uploadPropertyImage(item.file)
+        .then((result) =>
+          setUploads((prev) =>
+            prev.map((u) =>
+              u.id === item.id
+                ? {
+                    ...u,
+                    status: "done" as const,
+                    url: result.url,
+                    publicId: result.publicId,
+                  }
+                : u,
+            ),
+          ),
+        )
+        .catch((err) =>
+          setUploads((prev) =>
+            prev.map((u) =>
+              u.id === item.id
+                ? {
+                    ...u,
+                    status: "error" as const,
+                    error:
+                      err instanceof Error ? err.message : "Upload failed",
+                  }
+                : u,
+            ),
+          ),
+        );
+    });
+  };
+
+  const removeUpload = (id: string) => {
+    setUploads((prev) => {
+      const item = prev.find((u) => u.id === id);
+      if (item) {
+        URL.revokeObjectURL(item.previewUrl);
+      }
+      return prev.filter((u) => u.id !== id);
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (uploadingImage) {
-      toast.error("Please wait until the image upload finishes.");
+    const inProgress = uploads.some((u) => u.status === "uploading");
+    if (inProgress) {
+      toast.error("Wait for photos to finish uploading.");
       return;
     }
 
@@ -147,7 +204,12 @@ export function CreateListingForm() {
     setLoading(true);
 
     const priceInCents = Math.floor(parsedPrice * 100);
-    const images = formData.imageUrl ? [formData.imageUrl] : [];
+    const images = uploads
+      .filter((u) => u.status === "done")
+      .map((u) => u.url);
+    const imagePublicIds = uploads
+      .filter((u) => u.status === "done")
+      .map((u) => u.publicId);
 
     const meta = {
       bedrooms,
@@ -156,7 +218,7 @@ export function CreateListingForm() {
       neighborhood: formData.neighborhood,
       ...(phone ? { phone } : {}),
       ...(whatsapp ? { whatsapp } : {}),
-      ...(imagePublicId ? { imagePublicId } : {}),
+      ...(imagePublicIds.length > 0 ? { imagePublicIds } : {}),
     };
 
     createMutation.mutate({
@@ -165,11 +227,8 @@ export function CreateListingForm() {
       type: listingType,
       description,
       location,
-      images: images,
-      meta: {
-        ...meta,
-        neighborhood,
-      },
+      images,
+      meta,
     });
   };
 
@@ -284,65 +343,119 @@ export function CreateListingForm() {
                 </div>
               </div>
 
-              <div className='space-y-2'>
-                <Label
-                  htmlFor='imageFile'
-                  className='text-muted-foreground text-xs uppercase tracking-wider'
-                >
-                  Property Image
+              <div className='space-y-4'>
+                <Label className='text-muted-foreground text-xs uppercase tracking-wider'>
+                  Property Photos
                 </Label>
-                <Input
-                  id='imageFile'
-                  name='imageFile'
-                  type='file'
-                  accept='image/*'
-                  onChange={handleImageUpload}
-                  disabled={
-                    uploadingImage || loading || createMutation.isPending
-                  }
-                  className='h-10 border-border/60 bg-muted/20 focus:border-primary/50'
-                />
-                <p className='text-muted-foreground text-xs'>
-                  {uploadingImage
-                    ? "Uploading image..."
-                    : "Upload from your device (stored securely via backend -> Cloudinary)."}
-                </p>
-                {imagePublicId &&
-                  process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME && (
-                    <img
-                      src={getTransformedUrl(imagePublicId, {
-                        width: 960,
-                        height: 640,
-                        crop: "fill",
-                      })}
-                      alt='Uploaded property preview'
-                      className='mt-3 h-40 w-full rounded-md border border-border/50 object-cover'
-                    />
-                  )}
-                {!imagePublicId && formData.imageUrl && (
-                  <img
-                    src={formData.imageUrl}
-                    alt='Uploaded property preview'
-                    className='mt-3 h-40 w-full rounded-md border border-border/50 object-cover'
-                  />
-                )}
-              </div>
 
-              <div className='space-y-2'>
-                <Label
-                  htmlFor='imageUrl'
-                  className='text-muted-foreground text-xs uppercase tracking-wider'
+                {/* Drop zone */}
+                <div
+                  className='relative rounded-lg border-2 border-dashed border-border/60 bg-muted/20 p-8 text-center transition-colors hover:border-primary/50 hover:bg-muted/40'
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.currentTarget.classList.add("border-primary", "bg-primary/5");
+                  }}
+                  onDragLeave={(e) => {
+                    e.currentTarget.classList.remove(
+                      "border-primary",
+                      "bg-primary/5",
+                    );
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.currentTarget.classList.remove(
+                      "border-primary",
+                      "bg-primary/5",
+                    );
+                    handleFiles(e.dataTransfer.files);
+                  }}
                 >
-                  Image URL (optional override)
-                </Label>
-                <Input
-                  id='imageUrl'
-                  name='imageUrl'
-                  placeholder='https://...'
-                  value={formData.imageUrl}
-                  onChange={handleChange}
-                  className='h-10 border-border/60 bg-muted/20 focus:border-primary/50'
-                />
+                  <input
+                    type='file'
+                    multiple
+                    accept='image/*'
+                    onChange={(e) => {
+                      if (e.target.files) handleFiles(e.target.files);
+                      e.target.value = "";
+                    }}
+                    className='hidden'
+                    id='photo-input'
+                    disabled={loading || createMutation.isPending}
+                  />
+                  <label htmlFor='photo-input' className='cursor-pointer'>
+                    <div className='space-y-2'>
+                      <div className='text-sm font-medium'>
+                        Drag photos here or click to browse
+                      </div>
+                      <p className='text-muted-foreground text-xs'>
+                        Max 10 photos, 8 MB each. First photo = cover.
+                      </p>
+                    </div>
+                  </label>
+                </div>
+
+                {/* Preview grid */}
+                {uploads.length > 0 && (
+                  <div className='grid grid-cols-2 gap-3 md:grid-cols-4'>
+                    {uploads.map((item, index) => (
+                      <div
+                        key={item.id}
+                        className='relative aspect-square overflow-hidden rounded-md border border-border/40'
+                      >
+                        <img
+                          src={item.previewUrl}
+                          alt={`Photo ${index + 1}`}
+                          className='h-full w-full object-cover'
+                        />
+
+                        {/* Cover badge on first */}
+                        {index === 0 && (
+                          <div className='absolute left-1 top-1 rounded bg-primary px-2 py-0.5 text-white text-xs font-medium'>
+                            Cover
+                          </div>
+                        )}
+
+                        {/* Uploading spinner */}
+                        {item.status === "uploading" && (
+                          <div className='absolute inset-0 flex items-center justify-center bg-black/40'>
+                            <div className='h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent' />
+                          </div>
+                        )}
+
+                        {/* Error state */}
+                        {item.status === "error" && (
+                          <div className='absolute inset-0 flex flex-col items-center justify-center bg-red-500/30 p-2 text-center'>
+                            <p className='text-white text-xs font-medium'>
+                              Upload failed
+                            </p>
+                            {item.error && (
+                              <p className='text-white/80 text-xs'>
+                                {item.error}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Remove button */}
+                        <button
+                          type='button'
+                          onClick={() => removeUpload(item.id)}
+                          className='absolute right-1 top-1 rounded-full bg-black/50 p-1 text-white hover:bg-black/70'
+                          aria-label='Remove photo'
+                        >
+                          <X className='h-4 w-4' />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {uploads.length > 0 && (
+                  <p className='text-muted-foreground text-xs'>
+                    {uploads.filter((u) => u.status === "done").length} of{" "}
+                    {uploads.length} photos uploaded
+                  </p>
+                )}
               </div>
 
               <div className='space-y-2'>
@@ -480,7 +593,11 @@ export function CreateListingForm() {
             <Button
               type='submit'
               className='h-11 w-full font-semibold text-xs uppercase tracking-widest'
-              disabled={loading || createMutation.isPending || uploadingImage}
+              disabled={
+                loading ||
+                createMutation.isPending ||
+                uploads.some((u) => u.status === "uploading")
+              }
             >
               {createMutation.isPending && (
                 <Loader2 className='mr-2 h-4 w-4 animate-spin' />
