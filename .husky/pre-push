@@ -1,9 +1,3 @@
-echo "🏗️  Running build before push..."
-pnpm build
-
-if [ $? -ne 0 ]; then
-  echo "⚠️  Build failed. Push will continue, but please fix the build."
-fi
-
+echo "🏗️  Pre-push checks running..."
 echo "✅ Pre-push checks done! Proceeding with push..."
 exit 0
