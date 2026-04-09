@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 
 import "../index.css";
-import Header from "@/components/header";
 import Providers from "@/components/providers";
+import { SiteNavbar } from "@/components/site-navbar";
 
 const fontSerif = Cormorant_Garamond({
   variable: "--font-serif",
@@ -19,8 +19,9 @@ const fontSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-	title: "Kigali Homes",
-	description: "Kigali Homes - Real Estate Platform",
+  title: "Kigali Homes — Modern Real Estate",
+  description:
+    "Discover premium properties for sale and rent across Kigali. Find your place in Rwanda's most vibrant city.",
 };
 
 export default function RootLayout({
@@ -34,10 +35,8 @@ export default function RootLayout({
         className={`${fontSans.variable} ${fontSerif.variable} font-sans antialiased`}
       >
         <Providers>
-          <div className='grid h-svh grid-rows-[auto_1fr]'>
-            <Header />
-            {children}
-          </div>
+          <SiteNavbar />
+          {children}
         </Providers>
       </body>
     </html>

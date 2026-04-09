@@ -50,13 +50,13 @@ export function ListingCard({
     <Link href={`/listings/${id}`} className='group block h-full'>
       <div className='flex h-full flex-col overflow-hidden rounded-sm border border-border/40 bg-card transition-all duration-300 hover:border-border/80 hover:shadow-lg'>
         {/* Image Container */}
-        <div className='relative aspect-[3/2] overflow-hidden bg-muted'>
+        <div className='relative aspect-3/2 overflow-hidden bg-muted'>
           <img
             src={coverImage}
             alt={title}
             className='h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105'
           />
-          <div className='absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-30 transition-opacity group-hover:opacity-20' />
+          <div className='absolute inset-0 bg-linear-to-t from-[#0f2d62]/40 via-transparent to-transparent opacity-30 transition-opacity group-hover:opacity-20' />
 
           {hasStatusBadge && (
             <div className='absolute top-3 right-3'>
@@ -83,7 +83,7 @@ export function ListingCard({
         </div>
 
         {/* Content */}
-        <div className='flex flex-grow flex-col space-y-4 p-5'>
+        <div className='flex grow flex-col space-y-4 p-5'>
           <div className='space-y-1'>
             <div className='flex items-baseline justify-between gap-2'>
               <h3 className='line-clamp-1 font-medium font-serif text-foreground text-xl transition-colors group-hover:text-primary'>
