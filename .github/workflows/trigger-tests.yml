@@ -18,7 +18,7 @@ jobs:
       - name: Trigger Playwright tests in test repo
         uses: peter-evans/repository-dispatch@v2
         with:
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          token: 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
           repository: tito-org-12/real-estate
           event-type: run-playwright-tests
           client-payload: '{"github": ${{ toJson(github) }}, "environment": "${{ env.ENVIRONMENT }}"}'
