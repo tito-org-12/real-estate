@@ -25,6 +25,6 @@ jobs:
         uses: peter-evans/repository-dispatch@v2
         with:
           token: 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
-          repository: tito-org-12/real-estate
+          repository: tito-org-12/real-estate-e2e-test-
           event-type: run-playwright-tests
           client-payload: '{"github": ${{ toJson(github) }}, "environment": "${{ env.ENVIRONMENT }}"}'
