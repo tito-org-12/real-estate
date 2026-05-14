@@ -1,0 +1,24 @@
+name: Trigger Playwright Tests
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  trigger-tests:
+    name: Trigger tests in test repo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set environment URL
+        run: echo "ENVIRONMENT=https://www.kigalihome.live/" >> $GITHUB_ENV
+
+      - name: Trigger Playwright tests in test repo
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: tito-org-12/real-estate
+          event-type: run-playwright-tests
+          client-payload: '{"github": ${{ toJson(github) }}, "environment": "${{ env.ENVIRONMENT }}"}'
