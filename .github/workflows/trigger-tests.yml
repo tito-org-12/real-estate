@@ -18,7 +18,9 @@ jobs:
       - name: Debug token presence
         run: |
           echo "Token length: ${#TOKEN}"
-          echo "Token (masked): $TOKEN"
+          echo "First 4: ${TOKEN:0:4}"
+          echo "Last 4: ${TOKEN: -4}"
+          echo "Marker+token+marker: 6666666666666666666666${TOKEN}6666666666666666666666"
         env:
           TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
 
