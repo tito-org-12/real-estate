@@ -1,1 +1,1 @@
-renting app v1
+renting app
