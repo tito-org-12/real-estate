@@ -1,30 +1,120 @@
 name: Trigger Playwright Tests
 on:
-  push:
-    branches:
-      - main
+  deployment_status
 
 jobs:
   trigger-tests:
-    name: Trigger tests in test repo
     runs-on: ubuntu-latest
+    if: |
+      github.event.deployment_status.state == 'success' &&
+      contains(github.event.deployment.creator.login, 'vercel')
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set environment URL
-        run: echo "ENVIRONMENT=https://www.kigalihome.live/" >> $GITHUB_ENV
-
-      - name: Log github context
-        run: |
-          echo "$GITHUB_CONTEXT"
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-
-      - name: Trigger Playwright tests in test repo
+      - name: Trigger Playwright tests
         uses: peter-evans/repository-dispatch@v2
         with:
-          token: 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
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repository: tito-org-12/real-estate-e2e-test-
           event-type: run-playwright-tests
-          client-payload: '{"github": ${{ toJson(github) }}, "environment": "${{ env.ENVIRONMENT }}"}'
+          client-payload: '{"github": ${{ toJson(github) }}, "environment": "${{ github.event.deployment_status.environment_url }}"}'
+          
+
+# name: Trigger Playwright Tests
+# on:
+#   deployment_status
+
+# jobs:
+#   track-deployment:
+#     runs-on: ubuntu-latest
+#     if: github.event.deployment_status.state == 'success'
+#     steps:
+#       - name: Mark deployment as ready
+#         uses: actions/github-script@v7
+#         with:
+#           script: |
+#             const env = context.payload.deployment.environment;
+#             const creator = context.payload.deployment.creator.login;
+            
+#             // Only track Vercel deployments
+#             if (!creator.includes('vercel')) return;
+
+#             // Use a commit status to track which services are done
+#             await github.rest.repos.createCommitStatus({
+#               owner: context.repo.owner,
+#               repo: context.repo.repo,
+#               sha: context.payload.deployment.sha,
+#               state: 'success',
+#               context: `deployed/${env}`,   // e.g. "deployed/Production" "deployed/Preview"
+#               description: `${env} deployment ready`
+#             });
+
+#   trigger-tests:
+#     runs-on: ubuntu-latest
+#     needs: track-deployment
+#     steps:
+#       - name: Check if both deployments are ready
+#         id: check
+#         uses: actions/github-script@v7
+#         with:
+#           script: |
+#             const sha = context.payload.deployment.sha;
+
+#             const { data: statuses } = await github.rest.repos.listCommitStatusesForRef({
+#               owner: context.repo.owner,
+#               repo: context.repo.repo,
+#               ref: sha
+#             });
+
+#             const ready = (ctx) => statuses.some(s => 
+#               s.context === ctx && s.state === 'success'
+#             );
+
+#             const frontendReady = ready('deployed/Production');      // Vercel frontend
+#             const backendReady  = ready('deployed/production-back'); // your backend env name
+
+#             console.log({ frontendReady, backendReady });
+
+#             if (frontendReady && backendReady) {
+#               core.setOutput('both_ready', 'true');
+#             }
+
+#       - name: Trigger Playwright tests
+#         if: steps.check.outputs.both_ready == 'true'
+#         uses: peter-evans/repository-dispatch@v2
+#         with:
+#           token:  ${{ secrets.REPO_ACCESS_TOKEN }}
+#           repository: tito-org-12/real-estate-e2e-test-
+#           event-type: run-playwright-tests
+#           client-payload: '{"github": ${{ toJson(github) }}}'
+
+          
+
+# name: Trigger Playwright Tests
+# on:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   trigger-tests:
+#     name: Trigger tests in test repo
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
+
+#       - name: Set environment URL
+#         run: echo "ENVIRONMENT=https://www.kigalihome.live/" >> $GITHUB_ENV
+
+#       - name: Log github context
+#         run: |
+#           echo "$GITHUB_CONTEXT"
+#         env:
+#           GITHUB_CONTEXT: ${{ toJson(github) }}
+
+#       - name: Trigger Playwright tests in test repo
+#         uses: peter-evans/repository-dispatch@v2
+#         with:
+#           token: ${{ secrets.REPO_ACCESS_TOKEN }}
+#           repository: tito-org-12/real-estate-e2e-test-
+#           event-type: run-playwright-tests
+#           client-payload: '{"github": ${{ toJson(github) }}, "environment": "${{ env.ENVIRONMENT }}"}'
