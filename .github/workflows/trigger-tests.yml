@@ -20,7 +20,6 @@ jobs:
         if: >
           github.event.deployment_status.state == 'success' &&
           github.event.deployment.environment == 'Production' &&
-          github.event.deployment.ref == 'main' &&
           github.event.deployment_status.creator.login == 'vercel[bot]'
         uses: peter-evans/repository-dispatch@v2
         with:
