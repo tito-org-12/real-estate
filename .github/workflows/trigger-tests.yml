@@ -6,13 +6,22 @@ jobs:
   trigger-tests:
     runs-on: ubuntu-latest
     environment: REPO_ACCESS_TOKEN
-    if: >
-      github.event.deployment_status.state == 'success' &&
-      github.event.deployment.environment == 'REPO_ACCESS_TOKEN' &&
-      github.event.deployment.ref == 'main' &&
-      github.event.deployment_status.creator.login == 'vercel[bot]'
     steps:
+      - name: Debug payload
+        run: |
+          echo "state:       ${{ github.event.deployment_status.state }}"
+          echo "environment: ${{ github.event.deployment.environment }}"
+          echo "ref:         ${{ github.event.deployment.ref }}"
+          echo "sha:         ${{ github.event.deployment.sha }}"
+          echo "creator:     ${{ github.event.deployment_status.creator.login }}"
+          echo "env_url:     ${{ github.event.deployment_status.environment_url }}"
+
       - name: Trigger Playwright tests
+        if: >
+          github.event.deployment_status.state == 'success' &&
+          github.event.deployment.environment == 'Production' &&
+          github.event.deployment.ref == 'main' &&
+          github.event.deployment_status.creator.login == 'vercel[bot]'
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
