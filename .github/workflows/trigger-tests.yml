@@ -6,9 +6,11 @@ jobs:
   trigger-tests:
     runs-on: ubuntu-latest
     environment: REPO_ACCESS_TOKEN
-    if: |
+    if: >
       github.event.deployment_status.state == 'success' &&
-      contains(github.event.deployment.creator.login, 'vercel')
+      github.event.deployment.environment == 'REPO_ACCESS_TOKEN' &&
+      github.event.deployment.ref == 'main' &&
+      github.event.deployment_status.creator.login == 'vercel[bot]'
     steps:
       - name: Trigger Playwright tests
         uses: peter-evans/repository-dispatch@v2
