@@ -1,0 +1,23 @@
+name: Store Artifact
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  store:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write hardcoded UUID to file
+        run: |
+          echo "hardcoded-uuid-12345-abcde" > uuid.txt
+          cat uuid.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-uuid
+          path: uuid.txt
+          retention-days: 1
