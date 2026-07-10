@@ -55,13 +55,9 @@ jobs:
           event-type: run-playwright-tests
           client-payload: '{"github": ${{ toJson(github) }}, "environment": "${{ github.event.deployment_status.environment_url }}"}'
 
-  wait-for-coolify:
-    name: Wait for Coolify then trigger Playwright tests
-    runs-on: ubuntu-latest
-    env:
-      DEPLOY_REF: ${{ github.event.deployment.ref }}
-    steps:
       - name: Debug Coolify job fields
+        env:
+          DEPLOY_REF: ${{ github.event.deployment.ref }}
         run: |
           echo "=================== COOLIFY JOB FIELDS ==================="
           echo "DEPLOY_REF (env):              $DEPLOY_REF"
@@ -87,13 +83,12 @@ jobs:
           GH_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
           DEPLOY_SHA: ${{ github.event.deployment.sha }}
         run: |
-          echo "=================== RESOLVED BRANCH ==================="
-          branch=$(gh api \
+          branches=$(gh api \
             "repos/${{ github.repository }}/commits/$DEPLOY_SHA/branches-where-head" \
-            --jq '.[0].name // empty')
-          echo "sha:    $DEPLOY_SHA"
-          echo "branch: $branch"
-          echo "=========================================================="
+            --jq '[.[].name] | join(",")')
+          echo "=================== BRANCH NAME ==================="
+          echo "branch: $branches"
+          echo "====================================================="
 
 # name: Trigger Playwright Tests
 # on:
