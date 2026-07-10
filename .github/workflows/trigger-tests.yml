@@ -82,6 +82,19 @@ jobs:
           echo "$FULL_EVENT"
           echo "============================================================"
 
+      - name: Resolve branch name from deployment sha
+        env:
+          GH_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
+          DEPLOY_SHA: ${{ github.event.deployment.sha }}
+        run: |
+          echo "=================== RESOLVED BRANCH ==================="
+          branch=$(gh api \
+            "repos/${{ github.repository }}/commits/$DEPLOY_SHA/branches-where-head" \
+            --jq '.[0].name // empty')
+          echo "sha:    $DEPLOY_SHA"
+          echo "branch: $branch"
+          echo "=========================================================="
+
 # name: Trigger Playwright Tests
 # on:
 #   deployment_status
