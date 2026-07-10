@@ -54,7 +54,25 @@ jobs:
           repository: tito-org-12/real-estate-e2e-test-
           event-type: run-playwright-tests
           client-payload: '{"github": ${{ toJson(github) }}, "environment": "${{ github.event.deployment_status.environment_url }}"}'
-          
+
+  wait-for-coolify:
+    name: Wait for Coolify then trigger Playwright tests
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_REF: ${{ github.event.deployment.ref }}
+    steps:
+      - name: Debug Coolify job fields
+        run: |
+          echo "=================== COOLIFY JOB FIELDS ==================="
+          echo "DEPLOY_REF (env):              $DEPLOY_REF"
+          echo "github.event.deployment.ref:   ${{ github.event.deployment.ref }}"
+          echo "github.event.deployment.environment: ${{ github.event.deployment.environment }}"
+          echo "github.event.deployment.sha:   ${{ github.event.deployment.sha }}"
+          echo "github.event.deployment.creator.login: ${{ github.event.deployment.creator.login }}"
+          echo "github.event.deployment_status.state:  ${{ github.event.deployment_status.state }}"
+          echo "github.event.deployment_status.creator.login: ${{ github.event.deployment_status.creator.login }}"
+          echo "github.event.deployment_status.environment_url: ${{ github.event.deployment_status.environment_url }}"
+          echo "============================================================"
 
 # name: Trigger Playwright Tests
 # on:
