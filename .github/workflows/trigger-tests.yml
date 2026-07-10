@@ -34,7 +34,9 @@ jobs:
 
       - name: Debug payload
         run: |
+          echo "=================== DEPLOYMENT STATE ==================="
           echo "state:       ${{ github.event.deployment_status.state }}"
+          echo "=========================================================="
           echo "environment: ${{ github.event.deployment.environment }}"
           echo "ref:         ${{ github.event.deployment.ref }}"
           echo "sha:         ${{ github.event.deployment.sha }}"
