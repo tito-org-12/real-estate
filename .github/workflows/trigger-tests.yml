@@ -74,6 +74,14 @@ jobs:
           echo "github.event.deployment_status.environment_url: ${{ github.event.deployment_status.environment_url }}"
           echo "============================================================"
 
+      - name: Dump full github.event payload
+        env:
+          FULL_EVENT: ${{ toJson(github.event) }}
+        run: |
+          echo "=================== FULL github.event ==================="
+          echo "$FULL_EVENT"
+          echo "============================================================"
+
 # name: Trigger Playwright Tests
 # on:
 #   deployment_status
