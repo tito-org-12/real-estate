@@ -146,8 +146,7 @@ export function CreateListingForm() {
                 ? {
                     ...u,
                     status: "error" as const,
-                    error:
-                      err instanceof Error ? err.message : "Upload failed",
+                    error: err instanceof Error ? err.message : "Upload failed",
                   }
                 : u,
             ),
@@ -205,9 +204,7 @@ export function CreateListingForm() {
     setLoading(true);
 
     const priceInCents = Math.floor(parsedPrice * 100);
-    const images = uploads
-      .filter((u) => u.status === "done")
-      .map((u) => u.url);
+    const images = uploads.filter((u) => u.status === "done").map((u) => u.url);
     const imagePublicIds = uploads
       .filter((u) => u.status === "done")
       .map((u) => u.publicId);
@@ -219,7 +216,9 @@ export function CreateListingForm() {
       neighborhood: formData.neighborhood,
       ...(phone ? { phone } : {}),
       ...(whatsapp ? { whatsapp } : {}),
-      ...(formData.furnishingStatus ? { furnishingStatus: formData.furnishingStatus } : {}),
+      ...(formData.furnishingStatus
+        ? { furnishingStatus: formData.furnishingStatus }
+        : {}),
       ...(imagePublicIds.length > 0 ? { imagePublicIds } : {}),
     };
 
@@ -355,7 +354,10 @@ export function CreateListingForm() {
                   className='relative rounded-lg border-2 border-dashed border-border/60 bg-muted/20 p-8 text-center transition-colors hover:border-primary/50 hover:bg-muted/40'
                   onDragOver={(e) => {
                     e.preventDefault();
-                    e.currentTarget.classList.add("border-primary", "bg-primary/5");
+                    e.currentTarget.classList.add(
+                      "border-primary",
+                      "bg-primary/5",
+                    );
                   }}
                   onDragLeave={(e) => {
                     e.currentTarget.classList.remove(
@@ -419,7 +421,7 @@ export function CreateListingForm() {
 
                         {/* Uploading spinner */}
                         {item.status === "uploading" && (
-                          <div className='absolute inset-0 flex items-center justify-center bg-black/40'>
+                          <div className='absolute inset-0 flex items-center justify-center bg-[#0f2d62]/40'>
                             <div className='h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent' />
                           </div>
                         )}
@@ -442,7 +444,7 @@ export function CreateListingForm() {
                         <button
                           type='button'
                           onClick={() => removeUpload(item.id)}
-                          className='absolute right-1 top-1 rounded-full bg-black/50 p-1 text-white hover:bg-black/70'
+                          className='absolute right-1 top-1 rounded-full bg-[#0f2d62]/50 p-1 text-white hover:bg-[#0f2d62]/70'
                           aria-label='Remove photo'
                         >
                           <X className='h-4 w-4' />
@@ -563,7 +565,7 @@ export function CreateListingForm() {
                         type='radio'
                         name='furnishingStatus'
                         value='furnished'
-                        checked={formData.furnishingStatus === 'furnished'}
+                        checked={formData.furnishingStatus === "furnished"}
                         onChange={handleChange}
                         className='h-4 w-4 cursor-pointer'
                       />
@@ -574,7 +576,7 @@ export function CreateListingForm() {
                         type='radio'
                         name='furnishingStatus'
                         value='unfurnished'
-                        checked={formData.furnishingStatus === 'unfurnished'}
+                        checked={formData.furnishingStatus === "unfurnished"}
                         onChange={handleChange}
                         className='h-4 w-4 cursor-pointer'
                       />

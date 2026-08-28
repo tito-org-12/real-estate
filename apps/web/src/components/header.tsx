@@ -1,114 +1,119 @@
 "use client";
-import { Globe, Heart, MessageCircle, Search } from "lucide-react";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Button } from "./ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
-
-import { ModeToggle } from "./mode-toggle";
 import UserMenu from "./user-menu";
 
-export default function Header() {
-  const pathname = usePathname();
-  const [marketSelection, setMarketSelection] = useState("en-rw-rwf");
+const NAV_LINKS = [
+  { to: "/", label: "Home" },
+  { to: "/listings", label: "Properties" },
+  { to: "/advertisers", label: "About" },
+  { to: "/listings?type=services", label: "Services" },
+  { to: "/dashboard", label: "Agents" },
+] as const;
 
-  const links = [
-    { to: "/", label: "Home" },
-    { to: "/listings", label: "Properties" },
-    { to: "/advertisers", label: "Advertisers" },
-    { to: "/dashboard", label: "Dashboard" },
-    { to: "/listings/create", label: "Sell" },
-  ] as const;
+interface HeaderProps {
+  /** When true, renders as an absolute overlay on a full-bleed hero image */
+  overlay?: boolean;
+}
+
+export default function Header({ overlay = false }: Readonly<HeaderProps>) {
+  const pathname = usePathname();
 
   return (
-    <header className='sticky top-0 z-50 w-full border-border/40 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60'>
-      <div className='container mx-auto flex h-16 max-w-[1400px] items-center justify-between px-4 md:px-6'>
-        {/* Logo Area */}
-        <Link href='/' className='mr-6 flex items-center space-x-2'>
-          <span className='font-bold font-serif text-2xl text-foreground tracking-tight'>
-            KIGALI HOME
+    <header
+      className={cn(
+        "z-50 w-full",
+        overlay
+          ? "absolute top-0 left-0 right-0"
+          : "sticky top-0 border-b border-border/60 bg-background/90 backdrop-blur-md",
+      )}
+    >
+      <div className='mx-auto flex h-18 max-w-350 items-center justify-between px-6 md:px-10'>
+        {/* ── Logo ── */}
+        <Link href='/' className='flex items-center gap-2.5'>
+          {/* house icon */}
+          <svg
+            width='28'
+            height='28'
+            viewBox='0 0 28 28'
+            fill='none'
+            xmlns='http://www.w3.org/2000/svg'
+            aria-hidden='true'
+          >
+            <path
+              d='M4 12L14 3L24 12V25H18V18H10V25H4V12Z'
+              stroke='white'
+              strokeWidth='1.8'
+              strokeLinejoin='round'
+              fill='none'
+            />
+            <path
+              d='M14 3L24 12'
+              stroke='white'
+              strokeWidth='1.8'
+              strokeLinecap='round'
+            />
+          </svg>
+          <span className='font-serif text-xl font-semibold tracking-wide text-white'>
+            Kigali Home
           </span>
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className='hidden flex-1 items-center justify-center gap-8 font-medium text-sm md:flex'>
-          {links.map(({ to, label }) => (
-            <a
-              key={to}
-              href={to}
-              className={cn(
-                "group relative transition-colors hover:text-primary",
-                pathname === to ? "text-foreground" : "text-muted-foreground",
-              )}
-            >
-              {label}
-              <span
+        {/* ── Pill Nav ── */}
+        <nav
+          aria-label='Main navigation'
+          className='hidden items-center rounded-full border border-white/20 bg-white/15 px-2 py-1.5 backdrop-blur-sm md:flex'
+        >
+          {NAV_LINKS.map(({ to, label }) => {
+            const isActive = pathname === to;
+            return (
+              <Link
+                key={to}
+                href={to}
                 className={cn(
-                  "absolute -bottom-1 left-0 h-[1px] bg-primary transition-all duration-300 ease-out",
-                  pathname === to ? "w-full" : "w-0 group-hover:w-full",
+                  "relative flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-200",
+                  isActive ? "text-white" : "text-white/70 hover:text-white",
                 )}
-              />
-            </a>
-          ))}
+              >
+                {isActive && (
+                  <span
+                    className='h-1.5 w-1.5 rounded-full bg-white'
+                    aria-hidden='true'
+                  />
+                )}
+                {label}
+              </Link>
+            );
+          })}
         </nav>
 
-        {/* Right Actions */}
-        <div className='flex items-center gap-2'>
-          <div className='hidden lg:block'>
-            <Select
-              value={marketSelection}
-              onValueChange={(value) => {
-                if (value) setMarketSelection(value);
-              }}
-            >
-              <SelectTrigger className='h-9 min-w-[210px] border-[#0f2d62]/20 bg-white text-[#0f2d62]'>
-                <Globe className='mr-2 h-4 w-4 text-[#12b76a]' />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='en-rw-rwf'>
-                  English / Rwanda / RWF
-                </SelectItem>
-                <SelectItem value='rw-rw-rwf'>
-                  Kinyarwanda / Rwanda / RWF
-                </SelectItem>
-                <SelectItem value='fr-rw-rwf'>French / Rwanda / RWF</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        {/* ── Right actions ── */}
+        <div className='flex items-center gap-3'>
+          <UserMenu />
           <Link
             href='/listings'
-            aria-label='Search listings'
-            className='inline-flex h-9 w-9 items-center justify-center rounded-md text-[#0f2d62] transition-colors hover:bg-[#0f2d62]/5'
+            className='hidden items-center gap-1.5 rounded-full bg-[#e8a87c] px-5 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#d4956a] sm:flex'
           >
-            <Search className='h-4 w-4' />
+            Book Now
+            <svg
+              width='14'
+              height='14'
+              viewBox='0 0 14 14'
+              fill='none'
+              xmlns='http://www.w3.org/2000/svg'
+              aria-hidden='true'
+            >
+              <path
+                d='M2 7H12M7 2L12 7L7 12'
+                stroke='white'
+                strokeWidth='1.6'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+              />
+            </svg>
           </Link>
-          <Button
-            variant='ghost'
-            size='icon'
-            className='hidden text-[#0f2d62] hover:bg-[#0f2d62]/5 sm:inline-flex'
-            aria-label='Saved properties'
-          >
-            <Heart className='h-4 w-4' />
-          </Button>
-          <Button
-            variant='ghost'
-            size='icon'
-            className='hidden text-[#0f2d62] hover:bg-[#0f2d62]/5 sm:inline-flex'
-            aria-label='Messages'
-          >
-            <MessageCircle className='h-4 w-4' />
-          </Button>
-          <ModeToggle />
-          <UserMenu />
         </div>
       </div>
     </header>

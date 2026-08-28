@@ -59,21 +59,21 @@ function ImageCarousel({
           ))}
         </div>
 
-        <div className='pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60' />
+        <div className='pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0f2d62]/60 via-transparent to-transparent opacity-60' />
 
         {total > 1 && (
           <>
             <button
               onClick={() => goTo(current - 1)}
               aria-label='Previous slide'
-              className='absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white backdrop-blur-sm transition-colors hover:bg-black/60'
+              className='absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-[#0f2d62]/40 p-2 text-white backdrop-blur-sm transition-colors hover:bg-[#0f2d62]/60'
             >
               <ChevronLeft className='h-5 w-5' />
             </button>
             <button
               onClick={() => goTo(current + 1)}
               aria-label='Next slide'
-              className='absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white backdrop-blur-sm transition-colors hover:bg-black/60'
+              className='absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-[#0f2d62]/40 p-2 text-white backdrop-blur-sm transition-colors hover:bg-[#0f2d62]/60'
             >
               <ChevronRight className='h-5 w-5' />
             </button>
@@ -81,13 +81,13 @@ function ImageCarousel({
         )}
 
         {total > 1 && (
-          <div className='absolute right-4 top-4 rounded-full bg-black/50 px-3 py-1 text-xs text-white backdrop-blur-sm'>
+          <div className='absolute right-4 top-4 rounded-full bg-[#0f2d62]/50 px-3 py-1 text-xs text-white backdrop-blur-sm'>
             {current + 1} / {total}
           </div>
         )}
 
         {type && (
-          <Badge className='absolute bottom-6 left-6 rounded-md border-0 bg-white/95 px-4 py-1.5 font-medium text-black text-xs uppercase tracking-wide shadow-lg backdrop-blur-md'>
+          <Badge className='absolute bottom-6 left-6 rounded-md border-0 bg-white/95 px-4 py-1.5 font-medium text-[#0f2d62] text-xs uppercase tracking-wide shadow-lg backdrop-blur-md'>
             {type}
           </Badge>
         )}
@@ -156,8 +156,8 @@ export function ListingMedia({
         alt={title}
         className='h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105'
       />
-      <div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60' />
-      <Badge className='absolute bottom-6 left-6 rounded-md border-0 bg-white/95 px-4 py-1.5 font-medium text-black text-xs uppercase tracking-wide shadow-lg backdrop-blur-md'>
+      <div className='absolute inset-0 bg-gradient-to-t from-[#0f2d62]/60 via-transparent to-transparent opacity-60' />
+      <Badge className='absolute bottom-6 left-6 rounded-md border-0 bg-white/95 px-4 py-1.5 font-medium text-[#0f2d62] text-xs uppercase tracking-wide shadow-lg backdrop-blur-md'>
         {type}
       </Badge>
     </div>

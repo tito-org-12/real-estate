@@ -128,7 +128,7 @@ export default function ListingDetailsPage({
 
           <div className='lg:col-span-4'>
             <div className='sticky top-24 space-y-6'>
-              <div className='rounded-2xl border border-border/60 bg-card p-8 shadow-black/5 shadow-xl'>
+              <div className='rounded-2xl border border-border/60 bg-card p-8 shadow-[#0f2d62]/5 shadow-xl'>
                 <div className='mb-8 space-y-2'>
                   <div className='font-medium text-muted-foreground text-xs uppercase tracking-wider'>
                     Monthly Rent
